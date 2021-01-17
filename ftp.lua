@@ -9,12 +9,12 @@ if args[1] == "fetch" then
         exit()
     end
     rednet.broadcast("ftp") -- broadcast the message "ftp" to every channel
-    local sender, message, protocol = rednet.receive(5) -- wait for ftp server t respond, timeout is 5 seconds
+    local sender, message, protocol = rednet.receive(5) -- wait for ftp server to respond, timeout is 5 seconds
     if message == nil then
         print("ftp server not found")
     else
         rednet.send(sender, args[2]) -- send the desired filename to ftp server
-        local sender2, file, protocol2 = rednet.receive() -- wait for ftp to respond indefinately for file contents
+        local sender2, file, protocol2 = rednet.receive() -- wait for ftp to respond indefinetely for file contents
         f = fs.open(args[2], 'w')
         f.write(file)
         f.close()
@@ -26,9 +26,9 @@ elseif args[1] == "host" then
             rednet.send(sender, "ftp") -- respond with "I'm here!", so to speak
             local sender2, file, protocol2 = rednet.receive(5) -- wait 5 seconds to receive filename
             f = fs.open(file, 'r')
-            rednet.send(sender, f.readAll())
+            rednet.send(sender, f.readAll()) -- send back file contents
             f.close()
-            print("Sent \""..file.."\" to computer "..sender)
+            print("Sent \""..file.."\" to computer "..sender) -- log the interaction
         end
     end
 end
