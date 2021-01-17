@@ -14,10 +14,10 @@ function printUsage ()
 end
 
 if args[1] == "fetch" then
-    print("fetching " .. args[3] .. " from " .. args[2] .. "...")
+    print("fetching \"" .. args[3] .. "\" from \"" .. args[2] .. "\"...")
     print("Not yet implemented")
 elseif args[1] == "send" then
-    print("sending " .. args[3] .. " to " .. args[2] .. "...")
+    print("sending \"" .. args[3] .. "\" to \"" .. args[2] .. "\"...")
     print("Not yet implemented")
 else
     print("Mode can only be \"fetch\" or \"send\"")
