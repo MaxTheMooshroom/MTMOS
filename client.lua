@@ -2,6 +2,8 @@ local modem_loc = {...}[1]
 
 rednet.open(modem_loc)
 
+-- comment
+
 while true do
     rednet.broadcast(os.getComputerID())
     local master, message, protocol = rednet.receive(5)
