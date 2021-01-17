@@ -1,4 +1,5 @@
-local modem_loc = {...}[1]
+local cli_args = {...}
+local modem_loc = cli_args[1]
 
 rednet.open(modem_loc)
 
