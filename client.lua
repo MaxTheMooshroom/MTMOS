@@ -3,7 +3,7 @@ local modem_loc = {...}[1]
 rednet.open(modem_loc)
 
 while true do
-    rednet.broadcast()
+    rednet.broadcast(os.getComputerID())
     local master, message, protocol = rednet.receive(5)
 
     if not(message == nil) then break end
