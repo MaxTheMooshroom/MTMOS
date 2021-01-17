@@ -7,10 +7,14 @@ rednet.open(modem_loc)
 
 while true do
     rednet.broadcast(os.getComputerID())
+
+    print("pinging...")
     local master, message, protocol = rednet.receive(5)
 
     if not(message == nil) then break end
 end
+
+print(message)
 
 function deepcopy(orig)
     local orig_type = type(orig)
@@ -43,7 +47,7 @@ end
 
 local terminal_redirect = deepcopy(term.current())
 terminal_redirect.write = function(content)
-    rednet.send(master, "message:"content)
+    rednet.send(master, "message:"..content)
 end
 
 term.redirect(terminal_redirect)
