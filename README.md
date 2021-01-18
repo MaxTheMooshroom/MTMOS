@@ -5,7 +5,9 @@ This is a collection of scripts I am writing to allow for more robust computercr
 ### Scripts
 `ftp`: A file transfer protocol script that either hosts a file server or interacts with a file server.
 
-##### Usage
+##### ftp
+A file transfer protocol script that either hosts a file server or interacts with a file server.
+
 `ftp <host/fetch/send> <file> <modem side>`
 
 
