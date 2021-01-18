@@ -85,13 +85,13 @@ elseif args[1] == "host" then
                     print(sender.." tried to send \""..arguments[2].."\", but it already exists locally")
                     rednet.send(sender, "File already exists")
                 else
-                    print("Saving data to file \""..arguments[2].."\"")
+                    print("device at address "..sender.." uploaded \""..arguments[2].."\"")
                     local data = table.concat(slice(arguments, 3), delim)
                     local f = fs.open(arguments[2], 'w')
                     f.write(data)
                     f.close()
                     rednet.send(sender, "okay")
-                    print("device \""..sender.."\" uploaded "..arguments[2])
+                    print("Saving data to file \""..arguments[2].."\"")
                 end
             end
         end
