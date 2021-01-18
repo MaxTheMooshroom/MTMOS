@@ -1,6 +1,6 @@
 # computercraft-scripts
  
-This is a collection of scripts I am writing to allow for more robust computercraft utilization
+This is a collection of scripts I am writing to allow for more robust computercraft utilization. Only the scripts listed below are good for use.
 
 ### Scripts
 `ftp`: A file transfer protocol script that either hosts a file server or interacts with a file server.
