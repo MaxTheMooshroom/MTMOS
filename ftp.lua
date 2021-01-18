@@ -39,7 +39,7 @@ elseif args[1] == "send" then
         print("ftp server not found")
         exit()
     else
-        local _, file, protocol = rednet.receive() -- wait for ftp to respond indefinetely for file contents
+        --local _, file, protocol = rednet.receive() -- wait for ftp to respond indefinetely for file contents
         local f = fs.open(args[2], 'r')
         rednet.send(server, "send"..delim..args[2]..delim..f.readAll(), "ftp") -- send the desired filename to ftp server
         f.close()
