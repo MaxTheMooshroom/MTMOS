@@ -8,23 +8,23 @@ if args[1] == "fetch" then
         print("File already exists!")
         exit()
     end
-    rednet.broadcast("ftp") -- broadcast the message "ftp" to every channel
-    local sender, message, protocol = rednet.receive(5) -- wait for ftp server to respond, timeout is 5 seconds
-    if message == nil then
+    local server = rednet.lookup("ftp", "ftpserver") -- DNS lookup for the ftpserver
+    if server == nil then
         print("ftp server not found")
     else
-        rednet.send(sender, args[2]) -- send the desired filename to ftp server
-        local sender2, file, protocol2 = rednet.receive() -- wait for ftp to respond indefinetely for file contents
+        rednet.send(server, args[2], "ftp") -- send the desired filename to ftp server
+        local _, file, protocol = rednet.receive() -- wait for ftp to respond indefinetely for file contents
         f = fs.open(args[2], 'w')
         f.write(file)
         f.close()
     end
 elseif args[1] == "host" then
+    rednet.host("ftp", "ftpserver")
     while true do
         local sender, message, protocol = rednet.receive(1) -- listen for connection request for 1 second
-        if message == "ftp" then
-            rednet.send(sender, "ftp") -- respond with "I'm here!", so to speak
-            local sender2, file, protocol2 = rednet.receive(5) -- wait 5 seconds to receive filename
+        if protocol == "ftp" then
+            --rednet.send(sender, "ftp") -- respond with "I'm here!", so to speak
+            --local sender2, file, protocol2 = rednet.receive(5) -- wait 5 seconds to receive filename
             f = fs.open(file, 'r')
             rednet.send(sender, f.readAll()) -- send back file contents
             f.close()
