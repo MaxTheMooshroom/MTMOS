@@ -1,5 +1,5 @@
 function split(input, sep)
-    if set == nil then
+    if sep == nil then
         sep = "%s" --default sep to space
     end
 
@@ -11,6 +11,18 @@ function split(input, sep)
 
     return t
 end
+
+function slice(array, start, _end)
+    if _end == nil then
+        _end = #array
+    end
+    results = {}
+    for i in range(_end - start) do
+        results[i] = array[i + start]
+    end
+    return results
+end
+
 
 local delim = ':'
 local args = {...}
@@ -41,7 +53,7 @@ elseif args[1] == "send" then
     else
         --local _, file, protocol = rednet.receive() -- wait for ftp to respond indefinetely for file contents
         local f = fs.open(args[2], 'r')
-        print("Sending "..args[2].." to ftp server at address "..tostring(sender))
+        print("Sending "..args[2].." to ftp server at address "..tostring(server))
         rednet.send(server, "send"..delim..args[2]..delim..f.readAll(), "ftp") -- send the desired filename to ftp server
         f.close()
         print("Waiting for response...")
@@ -58,8 +70,6 @@ elseif args[1] == "host" then
     while true do
         local sender, message, protocol = rednet.receive(1) -- listen for connection request for 1 second
         if protocol == "ftp" then
-            --rednet.send(sender, "ftp") -- respond with "I'm here!", so to speak
-            --local sender2, file, protocol2 = rednet.receive(5) -- wait 5 seconds to receive filename
             local arguments = split(message, delim)
 
             print("Received \""..arguments[1].."\" request from address "..tostring(sender))
@@ -76,8 +86,9 @@ elseif args[1] == "host" then
                     rednet.send(sender, "File already exists")
                 else
                     print("Saving data to file \""..arguments[2].."\"")
+                    local data = table.concat(slice(arguments, 3), delim)
                     local f = fs.open(arguments[2], 'w')
-                    f.write(arguments[3])
+                    f.write(data)
                     f.close()
                     rednet.send(sender, "okay")
                     print("device \""..sender.."\" uploaded "..arguments[2])
