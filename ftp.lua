@@ -41,6 +41,7 @@ elseif args[1] == "send" then
     else
         --local _, file, protocol = rednet.receive() -- wait for ftp to respond indefinetely for file contents
         local f = fs.open(args[2], 'r')
+        print("Sending "..args[2].." to ftp server at address "..tostring(sender))
         rednet.send(server, "send"..delim..args[2]..delim..f.readAll(), "ftp") -- send the desired filename to ftp server
         f.close()
         print("Waiting for response...")
@@ -61,6 +62,8 @@ elseif args[1] == "host" then
             --local sender2, file, protocol2 = rednet.receive(5) -- wait 5 seconds to receive filename
             local arguments = split(message, delim)
 
+            print("Received \""..arguments[1].."\" request from address "..tostring(sender))
+
             if arguments[1] == "fetch" then
                 local f = fs.open(arguments[2], 'r')
                 rednet.send(tostring(sender), f.readAll()) -- send back file contents
@@ -72,6 +75,7 @@ elseif args[1] == "host" then
                     print(sender.." tried to send \""..arguments[2].."\", but it already exists locally")
                     rednet.send(sender, "File already exists")
                 else
+                    print("Saving data to file \""..arguments[2].."\"")
                     local f = fs.open(arguments[2], 'w')
                     f.write(arguments[3])
                     f.close()
