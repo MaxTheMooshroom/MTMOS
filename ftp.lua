@@ -26,7 +26,7 @@ elseif args[1] == "host" then
             --rednet.send(sender, "ftp") -- respond with "I'm here!", so to speak
             --local sender2, file, protocol2 = rednet.receive(5) -- wait 5 seconds to receive filename
             f = fs.open(file, 'r')
-            rednet.send(sender, f.readAll()) -- send back file contents
+            rednet.send(tostring(sender), f.readAll()) -- send back file contents
             f.close()
             print("Sent \""..file.."\" to computer "..sender) -- log the interaction
         end
