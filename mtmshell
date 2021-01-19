@@ -3,7 +3,7 @@ local args = {...}
 -- Commands:
 
 dependencies = {
-    utils = "",
+    utils = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/utils",
     sha1 = "http://regex.info/code/sha1.lua",
     json = "https://pastebin.com/raw/4nRg9CHU",
 }
@@ -24,7 +24,7 @@ while true do
 
     if command == "exit" then break end
 
-    local function = loadstring(command)
+    local func = loadstring(command)
 
     pcall(loadstring(command)..'()')
     print("> "..command)
