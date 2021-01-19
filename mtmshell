@@ -3,7 +3,7 @@ local args = {...}
 -- Commands:
 
 dependencies = {
-    utils = ""
+    utils = "",
     sha1 = "http://regex.info/code/sha1.lua",
     json = "https://pastebin.com/raw/4nRg9CHU",
 }
