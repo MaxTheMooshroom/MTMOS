@@ -1,0 +1,25 @@
+function split(input, sep)
+    if sep == nil then
+        sep = "%s" --default sep to space
+    end
+
+    local t = {}
+
+    for match in string.gmatch(input, "([^" .. sep .. "]+)") do
+        table.insert(t, match)
+    end
+
+    return t
+end
+
+function slice(array, start, _end)
+    if _end == nil then
+        _end = #array
+    end
+    results = {}
+    local diff = _end - start
+    for i=0,diff do
+        results[i] = array[i + start]
+    end
+    return results
+end

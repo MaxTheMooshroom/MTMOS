@@ -1,0 +1,31 @@
+local args = {...}
+
+-- Commands:
+
+dependencies = {
+    utils = ""
+    sha1 = "http://regex.info/code/sha1.lua",
+    json = "https://pastebin.com/raw/4nRg9CHU",
+}
+
+function checkDependencies()
+    for f, l in pairs(dependencies) do
+        print(shell.run("mtmscripts/wget "..l.." "..f))
+    end
+end
+
+
+
+-- End commands
+
+while true do
+    io.write('$ ')
+    command = io.read()
+
+    if command == "exit" then break end
+
+    local function = loadstring(command)
+
+    pcall(loadstring(command)..'()')
+    print("> "..command)
+end

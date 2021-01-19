@@ -1,27 +1,4 @@
-function split(input, sep)
-    if sep == nil then
-        sep = "%s" --default sep to space
-    end
-
-    local t = {}
-
-    for match in string.gmatch(input, "([^" .. sep .. "]+)") do
-        table.insert(t, match)
-    end
-
-    return t
-end
-
-function slice(array, start, _end)
-    if _end == nil then
-        _end = #array
-    end
-    results = {}
-    for i in range(_end - start) do
-        results[i] = array[i + start]
-    end
-    return results
-end
+os.loadAPI("mtmscripts/utils")
 
 
 local delim = ':'
@@ -70,13 +47,15 @@ elseif args[1] == "host" then
     while true do
         local sender, message, protocol = rednet.receive(1) -- listen for connection request for 1 second
         if protocol == "ftp" then
-            local arguments = split(message, delim)
+            local arguments = utils.split(message, delim)
 
             print("Received \""..arguments[1].."\" request from address "..tostring(sender))
 
             if arguments[1] == "fetch" then
                 local f = fs.open(arguments[2], 'r')
-                rednet.send(tostring(sender), f.readAll()) -- send back file contents
+                local s = tostring(sender)
+                local contents = f.readAll()
+                rednet.send(s, contents) -- send back file contents
                 f.close()
                 print("Sent \""..file.."\" to computer "..sender) -- log the interaction
 

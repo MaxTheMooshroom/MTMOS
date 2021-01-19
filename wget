@@ -8,5 +8,5 @@ if not(fs.exists(args[2])) then
     file.write(response)
     file.close()
 else
-    print("File \"" .. args[2] .. " already exists!")
+    print("File \"" .. args[2] .. "\" already exists!")
 end
