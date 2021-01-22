@@ -50,12 +50,9 @@ end
 
 function commands.loadDependencies()
     local missing = commands.checkDependencies()
-    -- print(missing)
-    -- print("----------")
     for f, l in pairs(dependencies) do -- for each dependency
-        print(utils.containsValue(missing, f))
         if not utils.containsValue(missing, f) then -- if the dependency isn't missing
-            loadstring("os.loadAPI('"..f.."')")() -- load the dependency
+            os.loadAPI(f) -- load the dependency
         end
     end
 end
