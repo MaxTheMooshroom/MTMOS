@@ -77,21 +77,23 @@ end
 
 -- credit: http://www.computercraft.info/forums2/index.php?/topic/11771-print-coloured-text-easily/
 function printWithFormat(...)
-        local s = "&1"
-        for k, v in ipairs(arg) do
-                s = s .. v
-        end
-        s = s .. "&0"
+    local s = "&0"
+    for k, v in ipairs(arg) do
+        s = s .. v
+    end
+    s = s .. "&0"
 
-        local fields = {}
-        local lastcolor, lastpos = "0", 0
-        for pos, clr in s:gmatch"()&(%x)" do
-                table.insert(fields, {s:sub(lastpos + 2, pos - 1), lastcolor})
-                lastcolor, lastpos = clr , pos
-        end
+    local fields = {}
+    local lastcolor, lastpos = "0", 0
+    for pos, clr in s:gmatch"()&(%x)" do
+        table.insert(fields, {s:sub(lastpos + 2, pos - 1), lastcolor})
+        lastcolor, lastpos = clr , pos
+    end
 
-        for i = 2, #fields do
-                term.setTextColor(2 ^ (tonumber(fields[i][2], 16)))
-                io.write(fields[i][1])
-        end
+    for i = 2, #fields do
+        term.setTextColor(2 ^ (tonumber(fields[i][2], 16)))
+        io.write(fields[i][1])
+    end
+    io.write('\n')
+    term.setTextColor(colors.white)
 end

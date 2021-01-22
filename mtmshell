@@ -2,7 +2,7 @@
 os.loadAPI("utils")
 
 shell.run("clear")
-utils.printWithFormat("&aMTMOS V0.0.1&0")
+utils.printWithFormat("&2MTMOS V0.0.1")
 print()
 
 local args = {...}
@@ -103,9 +103,9 @@ end
 local miss = commands.checkDependencies()
 if #miss > 0 then
     for name = 1, #miss do
-        print("[WARNING]: Missing dependency: "..miss[name])
+        utils.printWithFormat("&0[&1WARNING&0]: Missing dependency: "..miss[name])
     end
-    print("Please run the dependency installer with 'installDependencies'")
+    utils.printWithFormat("&0Please run the dependency installer with \n'&2installDependencies&0'")
     print()
 end
 -- end search
