@@ -1,4 +1,5 @@
---loadstring("os.loadAPI('mtmscripts/mtmshell')")()
+--require("utils")
+os.loadAPI("utils")
 
 local args = {...}
 
@@ -8,12 +9,9 @@ dependencies = {
     json = "https://pastebin.com/raw/4nRg9CHU",
 }
 
--- Commands:
-
+-- Begin Commands:
 commands = {}
 _G.commands = commands
-
-os.loadAPI("utils")
 
 function commands.checkDependencies()
     local missing = {}
@@ -42,9 +40,9 @@ function commands.installDependency(dep)
 end
 
 function commands.installDependencies()
-    local missing = checkDependencies()
-    for dep=1,#missing do
-        commands.installDependency(missing[dep])
+    local missing = commands.checkDependencies()
+    for i=1,#missing do
+        commands.installDependency(missing[i])
     end
 end
 
