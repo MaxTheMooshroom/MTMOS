@@ -1,8 +1,8 @@
 local utils_url = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/utils"
 local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/mtmshell"
 
-local utils_data = http.get(utils_url)
-local shell_data = http.get(shell_url)
+local utils_data = http.get(utils_url).readAll()
+local shell_data = http.get(shell_url).readAll()
 
 local utils = fs.open("utils", 'w')
 utils.write(utils_data)

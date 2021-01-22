@@ -32,7 +32,7 @@ function commands.installDependency(dep)
     end
     if dependencies[dep] ~= nil then
         print("downloading \""..dep.."\"...")
-        local data = http.get(dependencies[dep])
+        local data = http.get(dependencies[dep]).readAll()
         print("installing \""..dep.."\"...")
         local file = fs.open(dep, 'w')
         file.write(data)
