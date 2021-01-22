@@ -1,6 +1,10 @@
 --require("utils")
 os.loadAPI("utils")
 
+shell.run("clear")
+utils.printWithFormat("&aMTMOS V0.0.1&0")
+print()
+
 local args = {...}
 
 dependencies = {}
