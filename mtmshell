@@ -1,6 +1,6 @@
-local args = {...}
+--loadstring("os.loadAPI('mtmscripts/mtmshell')")()
 
--- Commands:
+local args = {...}
 
 dependencies = {
     utils = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/utils",
@@ -8,24 +8,137 @@ dependencies = {
     json = "https://pastebin.com/raw/4nRg9CHU",
 }
 
-function checkDependencies()
+-- Commands:
+
+commands = {}
+_G.commands = commands
+
+os.loadAPI("utils")
+
+function commands.checkDependencies()
+    local missing = {}
     for f, l in pairs(dependencies) do
-        print(shell.run("mtmscripts/wget "..l.." "..f))
+        if not fs.exists(f) then
+            missing[#missing + 1] = f
+        end
+    end
+    return missing
+end
+
+function commands.installDependency(dep)
+    if fs.exists(dep) then
+        print("\""..dep.."\" is already installed...")
+        return
+    end
+    if dependencies[dep] ~= nil then
+        print("downloading \""..dep.."\"...")
+        local data = http.get(dependencies[dep])
+        print("installing \""..dep.."\"...")
+        local file = fs.open(dep, 'w')
+        file.write(data)
+        file.close()
+        print("Done!\n")
     end
 end
 
+function commands.installDependencies()
+    local missing = checkDependencies()
+    for dep=1,#missing do
+        commands.installDependency(missing[dep])
+    end
+end
 
+function commands.loadDependencies()
+    local missing = commands.checkDependencies()
+    -- print(missing)
+    -- print("----------")
+    print(textutils.serialize(dependencies))
+    print("----------")
+    print(textutils.serialize(missing))
+    for f, l in pairs(dependencies) do -- for each dependency
+        print(utils.containsValue(missing, f))
+        if not utils.containsValue(missing, f) then -- if the dependency isn't missing
+            loadstring("os.loadAPI('"..f.."')")() -- load the dependency
+        end
+    end
+end
+
+function commands.shell(str)
+    shell.run(str)
+end
+
+function commands.lua(str)
+    if str == nil then
+        shell.run('lua')
+    else
+        loadstring(str)()
+    end
+end
+
+function commands.help()
+    local count = 0
+    for i in pairs(commands) do count = count + 1 end
+    print("Commands found: "..tostring(count))
+    --print(commands)
+    for i=1,count do
+        print(commands[i])
+    end
+end
 
 -- End commands
 
+-- function for finding a function given its name as a string
+function findfunction(x)
+  assert(type(x) == "string")
+  local f=_G
+  for v in x:gmatch("[^%.]+") do
+    if type(f) ~= "table" then
+       return nil, "looking for '"..v.."' expected table, not "..type(f)
+    end
+    f=f[v]
+  end
+  if type(f) == "function" then
+    return f, nil
+  else
+    return nil, "expected function, not "..type(f)
+  end
+end
+
+-- find missing dependencies
+local miss = commands.checkDependencies()
+if #miss > 0 then
+    for name = 1, #miss do
+        print("[WARNING]: Missing dependency: "..miss[name])
+    end
+    print("Please run the dependency installer with 'installDependencies'")
+    print()
+end
+-- end search
+
+commands.loadDependencies()
+
 while true do
     io.write('$ ')
-    command = io.read()
+
+    local input = io.read()
+    local args = utils.split(input)
+    local command = args[1]
+
+    table.remove(args, 1)
 
     if command == "exit" then break end
+    local func, err = findfunction('commands.'..command)
 
-    local func = loadstring(command)
-
-    pcall(loadstring(command)..'()')
-    print("> "..command)
+    if err ~= nil then
+        print("Could not find command \""..command.."\"")
+        print(err)
+    else
+        if #args == 0 then
+            func()
+        else
+            func(utils.join(args))
+        end
+        --print("hit2")
+    end
+    --print("> "..command)
 end

@@ -12,6 +12,57 @@ function split(input, sep)
     return t
 end
 
+function join(data, sep)
+    if sep == nil then
+        sep = ' '
+    end
+    if #data == 0 then return "" end
+    if #data == 1 then return data[1] end
+    local t = data[1]
+    for i=2,#data do
+        t = t..sep..data[i]
+    end
+    return t
+end
+
+function getKeys(t)
+    local t2 = {}
+    local i = 0
+    for k, v in pairs(t) do
+        i = i + 1
+        t2[i] = k
+    end
+    return t2
+end
+
+function containsKey(t, key)
+    local val = false
+    -- print("looking for "..key)
+    for k, v in pairs(t) do
+        if k == key then
+        --    print(v.."=="..key)
+            val = true
+        --else
+        --    print(v.."!="..key)
+        end
+    end
+    return val
+end
+
+function containsValue(t, key)
+    local val = false
+    -- print("looking for "..key)
+    for k, v in pairs(t) do
+        if v == key then
+        --    print(v.."=="..key)
+            val = true
+        --else
+        --    print(v.."!="..key)
+        end
+    end
+    return val
+end
+
 function slice(array, start, _end)
     if _end == nil then
         _end = #array

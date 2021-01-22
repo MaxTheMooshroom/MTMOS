@@ -1,0 +1,19 @@
+local utils_url = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/utils"
+local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/mtmshell"
+
+local utils_data = http.get(utils_url)
+local shell_data = http.get(shell_url)
+
+local utils = fs.open("utils", 'w')
+utils.write(utils_data)
+utils.close()
+
+shell.run('mkdir mtmscripts')
+local shell = fs.open("mtmscripts/mtmshell", 'w')
+shell.write(shell_data)
+shell.close()
+
+local startup = fs.open("startup", 'w')
+startup.write([[
+shell.run("mtmscripts/mtmshell")
+]])
