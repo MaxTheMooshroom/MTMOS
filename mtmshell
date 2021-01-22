@@ -3,7 +3,6 @@ os.loadAPI("utils")
 
 shell.run("clear")
 utils.printWithFormat("&2MTMOS V0.0.1")
-print()
 
 local args = {...}
 
@@ -68,6 +67,11 @@ function commands.lua(str)
     else
         loadstring(str)()
     end
+end
+
+function commands.clear()
+    shell.run("clear")
+    utils.printWithFormat("&2MTMOS V0.0.1")
 end
 
 function commands.help()
