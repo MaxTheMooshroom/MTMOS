@@ -132,7 +132,7 @@ CoroutineManager.main = function(...)
         --print("event: "..event_type)
         for k, v in pairs(CoroutineManager.listeners) do
             if event_type == v then
-                print(v)
+                --print(v)
                 coroutine.resume(k, p1, p2, p3, p4, p5)
             end
         end
@@ -143,12 +143,13 @@ end
 -- Native Coroutines
 local shell_input_buffer = ""
 function shell_routine(p1, p2, p3, p4, p5) -- char event
+    term.setCursorBlink(true)
     io.write('$ ')
     while true do
-        print(p1)
+        --print(p1)
         io.write(p1)
         shell_input_buffer = shell_input_buffer..p1
-        coroutine.yield()
+        p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
 
@@ -158,9 +159,9 @@ CoroutineManager.addListener(shell_routine_coroutine, "char")
 
 function shell_key_routine(p1, p2, p3, p4, p5) -- key event
     while true do
-        print('test')
-        if p1 == 28 then
-            print("enter")
+        --print('test')
+        if p1 == keys.enter then
+            print()
             local args = utils.split(shell_input_buffer)
             local command = args[1]
 
@@ -182,8 +183,10 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
             end
             shell_input_buffer = ''
             io.write('$ ')
+        elseif p1 == keys.backspace then
+            shell_input_buffer = shell_input_buffer:sub(1, -2)
         end
-        coroutine.yield()
+        p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
 CoroutineManager.addListener(coroutine.create(shell_key_routine), "key")
