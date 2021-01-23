@@ -116,28 +116,77 @@ end
 
 commands.loadDependencies()
 
-while true do
-    io.write('$ ')
-
-    local input = io.read()
-    local args = utils.split(input)
-    local command = args[1]
-
-    table.remove(args, 1)
-
-    if command == "exit" then break end
-    local func, err = findfunction('commands.'..command)
-
-    if err ~= nil then
-        print("Could not find command \""..command.."\"")
-        print(err)
-    else
-        if #args == 0 then
-            func()
-        else
-            func(utils.join(args))
-        end
-        --print("hit2")
+-- Coroutine Manager
+CoroutineManager = {}
+_G.CoroutineManager = CoroutineManager
+CoroutineManager.listeners = {}
+CoroutineManager.addListener = function(func, event)
+    if type(func) ~= "thread" then
+        error("func must be a coroutine. Please use coroutine.create(func)")
     end
-    --print("> "..command)
+    CoroutineManager.listeners[func] = event
 end
+CoroutineManager.main = function(...)
+    while true do
+        local event_type, p1, p2, p3, p4, p5 = os.pullEvent()
+        --print("event: "..event_type)
+        for k, v in pairs(CoroutineManager.listeners) do
+            if event_type == v then
+                print(v)
+                coroutine.resume(k, p1, p2, p3, p4, p5)
+            end
+        end
+    end
+end
+-- end Coroutine Manager
+
+-- Native Coroutines
+local shell_input_buffer = ""
+function shell_routine(p1, p2, p3, p4, p5) -- char event
+    io.write('$ ')
+    while true do
+        print(p1)
+        io.write(p1)
+        shell_input_buffer = shell_input_buffer..p1
+        coroutine.yield()
+    end
+end
+
+local shell_routine_coroutine = coroutine.create(shell_routine)
+coroutine.resume(shell_routine_coroutine, '')
+CoroutineManager.addListener(shell_routine_coroutine, "char")
+
+function shell_key_routine(p1, p2, p3, p4, p5) -- key event
+    while true do
+        print('test')
+        if p1 == 28 then
+            print("enter")
+            local args = utils.split(shell_input_buffer)
+            local command = args[1]
+
+            table.remove(args, 1)
+
+            if command == "exit" then break end
+            local func, err = findfunction('commands.'..command)
+
+            if err ~= nil then
+                print("Could not find command \""..command.."\"")
+                print(err)
+            else
+                if #args == 0 then
+                    func()
+                else
+                    func(utils.join(args))
+                end
+                --print("hit2")
+            end
+            shell_input_buffer = ''
+            io.write('$ ')
+        end
+        coroutine.yield()
+    end
+end
+CoroutineManager.addListener(coroutine.create(shell_key_routine), "key")
+-- End Native Coroutines
+
+CoroutineManager.main()
