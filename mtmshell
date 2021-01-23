@@ -33,7 +33,7 @@ function commands.installDependency(dep)
     end
     if dependencies[dep] ~= nil then
         print("downloading \""..dep.."\"...")
-        local data = utils.wrapRequest(dependencies[dep])
+        local data = coroutine.yield("http.get "..dependencies[dep])--utils.wrapRequest(dependencies[dep])
         print("installing \""..dep.."\"...")
         local file = fs.open(dep, 'w')
         file.write(data)
@@ -137,9 +137,14 @@ CoroutineManager.main = function(...)
         for k, v in pairs(CoroutineManager.listeners) do
             if event_type == v then
                 --print(v)
-                local status, result = coroutine.resume(k, p1, p2, p3, p4, p5)
-                if result == "exit" then
-                    return
+                local status, results = coroutine.resume(k, p1, p2, p3, p4, p5)
+                if results ~= nil then
+                    results = utils.split(results)
+                    if results[1] == "exit" then
+                        return
+                    elseif results[1] == "http.get" then
+                        coroutine.resume(k, http.get(results[2]).readAll())
+                    end
                 end
             end
         end
@@ -149,7 +154,7 @@ end
 
 -- Native Coroutines
 local shell_input_buffer = ""
-function shell_routine(p1, p2, p3, p4, p5) -- char event
+function shell_char_routine(p1, p2, p3, p4, p5) -- char event
     term.setCursorBlink(true)
     io.write('$ ')
     while true do
@@ -160,7 +165,7 @@ function shell_routine(p1, p2, p3, p4, p5) -- char event
     end
 end
 
-local shell_routine_coroutine = coroutine.create(shell_routine)
+local shell_routine_coroutine = coroutine.create(shell_char_routine)
 
 CoroutineManager.addListener(shell_routine_coroutine, "char")
 
