@@ -118,22 +118,14 @@ function sortedKeys(t, f)
 end
 
 -- credit: http://www.computercraft.info/forums2/index.php?/topic/16676-solved-problem-using-httpget-from-within-coroutines/
-local function wrapRequest( _url, _post )
+function wrapRequest( _url, _post )
   local requestID = http.request( _url, _post )
   while true do
     local event, param1, param2 = os.pullEvent()
     if event == "http_success" and param1 == _url then
-      return param2
+      return param2.readAll()
     elseif event == "http_failure" and param1 == _url then
       return nil
     end
   end
-end
-
-_G.http.get = function( _url )
-  return wrapRequest( _url, nil )
-end
-
-_G.http.post = function( _url, _post )
-  return wrapRequest( _url, _post or "" )
 end
