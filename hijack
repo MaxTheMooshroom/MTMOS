@@ -1,5 +1,0 @@
-os.loadAPI("mtmscripts/utils")
-
-function hijack(func)
-
-end

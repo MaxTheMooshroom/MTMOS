@@ -4,17 +4,19 @@ local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/computercra
 local utils_data = http.get(utils_url).readAll()
 local shell_data = http.get(shell_url).readAll()
 
-local utils = fs.open("utils", 'w')
+shell.run('mkdir mtmos')
+shell.run('mkdir mtmos/core')
+
+local utils = fs.open("mtmos/core/utils", 'w')
 utils.write(utils_data)
 utils.close()
 
-shell.run('mkdir mtmscripts')
-local shell = fs.open("mtmscripts/mtmshell", 'w')
+
+local shell = fs.open("mtmos/core/mtmshell", 'w')
 shell.write(shell_data)
 shell.close()
 
 local startup = fs.open("startup", 'w')
 startup.write([[
-os.loadAPI("mtmscripts/mtmshell run")
-CoroutineManager.main()
+shell.run("mtmscripts/mtmshell run")
 ]])

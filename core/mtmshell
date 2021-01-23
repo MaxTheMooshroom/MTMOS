@@ -1,5 +1,5 @@
 --require("utils")
-os.loadAPI("utils")
+os.loadAPI("mtmos/core/utils")
 
 local args = {...}
 
@@ -12,7 +12,7 @@ dependencies['json'] = "https://pastebin.com/raw/4nRg9CHU"
 commands = {}
 _G.commands = commands
 
-function checkDependencies()
+function getMissingDependencies()
     local missing = {}
     for f, l in pairs(dependencies) do
         if not fs.exists(f) then
@@ -22,8 +22,8 @@ function checkDependencies()
     return missing
 end
 
-function commands.checkDependencies()
-    print(textutils.serialize(checkDependencies()))
+function commands.checkDependencies(...)
+    print(textutils.serialize(getMissingDependencies()))
 end
 
 function commands.installDependency(dep)
@@ -43,7 +43,7 @@ function commands.installDependency(dep)
 end
 
 function commands.installDependencies()
-    local missing = checkDependencies()
+    local missing = getMissingDependencies()
     for i=1,#missing do
         commands.installDependency(missing[i])
     end
@@ -103,17 +103,6 @@ function findfunction(x)
     return nil, "expected function, not "..type(f)
   end
 end
-
--- find missing dependencies
-local miss = checkDependencies()
-if #miss > 0 then
-    for name = 1, #miss do
-        utils.printWithFormat("&0[&1WARNING&0]: Missing dependency: "..miss[name])
-    end
-    utils.printWithFormat("&0Please run the dependency installer with \n'&2installDependencies&0'")
-    print()
-end
--- end search
 
 commands.loadDependencies()
 
@@ -212,6 +201,17 @@ CoroutineManager.addListener(coroutine.create(shell_key_routine), "key")
 if args[1] == 'run' then
     shell.run("clear")
     utils.printWithFormat("&2MTMOS V0.0.1")
+
+    -- find missing dependencies
+    local miss = getMissingDependencies()
+    if #miss > 0 then
+        for name = 1, #miss do
+            utils.printWithFormat("&0[&1WARNING&0]: Missing dependency: "..miss[name])
+        end
+        utils.printWithFormat("&0Please run the dependency installer with \n'&2installDependencies&0'")
+        print()
+    end
+    -- end search
 
     coroutine.resume(shell_routine_coroutine, '')
 
