@@ -18,5 +18,5 @@ shell.close()
 
 local startup = fs.open("startup", 'w')
 startup.write([[
-shell.run("mtmscripts/mtmshell run")
+shell.run("mtmos/core/mtmshell run")
 ]])
