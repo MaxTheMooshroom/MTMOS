@@ -1,41 +1,68 @@
-# computercraft-scripts
+# MaxTheMooshroom's OS (MTMOS)
+Current version: 0.0.1
  
-This is a collection of scripts I am writing to allow for more robust computercraft utilization. 
+This is an OS I'm creating for computercraft. Currently a WIP, I would not recommend installing yet, but feel free to peruse the code.
 
-***Only the scripts listed below are good for use.***
-
-### Scripts
-`ftp`: A file transfer protocol script that either hosts a file server or interacts with a file server.
-
-`wget`: Sends a get request to the provided url and saves the response's contents to the filename provided.
+The intended use case is to allow for easy multi-processing. I want to be able to execute commands while simultaneously receiving messages from a network. 
 
 
-##### ftp
-A file transfer protocol script that either hosts a file server or interacts with a file server.
+### Installation
+To install MTMOS, open a computercraft computer and type (or paste line by line) the following:
+`lua`
 
-`ftp <host/fetch/send> <file> <modem side>`
+`installer_data = http.get("https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/installer").readAll()`
 
+`installer = fs.open("installer", 'w')`
 
-Host usage:
+`installer.write(installer_data)`
 
-`ftp host . top`
+`installer.close()`
 
+`exit()`
 
-Fetching a file from the ftp server with a computer that has a modem on the top face:
+`installer`
 
-`ftp fetch my_file top`
+If you do not close the file by calling `installer.close()`, java will lock the file, so be sure not to forget that line!
 
+### Current Commands
+Currently the shell has the following available commands:
 
-Sending a file to the ftp server with a computer that has a modem on the left face:
+##### checkDependencies
+`checkDependencies` verifies that all dependencies are installed. Any missing dependendies will be printed to the terminal.
 
-`ftp send my_file left`
+##### clear
+`clear` clears the terminal. The top line is reserved for notifications.
 
+##### help
+`help` prints a list of commands. In the future, `help <command>` will also be available to print help with a specific command.
 
-##### wget
-Sends a get request to the provided url and saves the response's contents to the filename provided.
+##### installDependencies
+`installDependencies` installs all missing dependencies.
 
-`wget <url> <file>`
+##### installDependency
+`installDependency <dependency>` installs the provided dependency if it is not already installed. 
 
-Example: 
+##### loadDependencies
+`loadDependencies` loads the installed dependencies in case they aren't loaded or haven't been reloaded since a local edit was made.
 
-`wget https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/ftp.lua ftp`
+##### lua
+`lua` opens the lua shell.
+`lua <lua code>` executes the provided `lua_code`
+
+example:
+
+`lua print("hello")`
+
+output:
+
+`hello`
+
+##### shell
+`shell <shell command>` executes code on the CraftOS shell, as if you were directly using it.
+
+example:
+
+`shell rm junk_file`
+
+removes the file `junk_file`
+
