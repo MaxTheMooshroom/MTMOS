@@ -15,7 +15,7 @@ dependencies['json'] = "https://pastebin.com/raw/4nRg9CHU"
 commands = {}
 _G.commands = commands
 
-function commands.checkDependencies()
+function checkDependencies()
     local missing = {}
     for f, l in pairs(dependencies) do
         if not fs.exists(f) then
@@ -23,6 +23,10 @@ function commands.checkDependencies()
         end
     end
     return missing
+end
+
+function commands.checkDependencies()
+    print(textutils.serialize(checkDependencies()))
 end
 
 function commands.installDependency(dep)
@@ -42,14 +46,14 @@ function commands.installDependency(dep)
 end
 
 function commands.installDependencies()
-    local missing = commands.checkDependencies()
+    local missing = checkDependencies()
     for i=1,#missing do
         commands.installDependency(missing[i])
     end
 end
 
 function commands.loadDependencies()
-    local missing = commands.checkDependencies()
+    local missing = checkDependencies()
     for f, l in pairs(dependencies) do -- for each dependency
         if not utils.containsValue(missing, f) then -- if the dependency isn't missing
             os.loadAPI(f) -- load the dependency
@@ -104,7 +108,7 @@ function findfunction(x)
 end
 
 -- find missing dependencies
-local miss = commands.checkDependencies()
+local miss = checkDependencies()
 if #miss > 0 then
     for name = 1, #miss do
         utils.printWithFormat("&0[&1WARNING&0]: Missing dependency: "..miss[name])
@@ -129,11 +133,17 @@ end
 CoroutineManager.main = function(...)
     while true do
         local event_type, p1, p2, p3, p4, p5 = os.pullEvent()
+        if event_type ~= "key" and event_type ~= "char" and event_type ~= "key_up" then
+            print('Erroneous event triggered')
+        end
         --print("event: "..event_type)
         for k, v in pairs(CoroutineManager.listeners) do
             if event_type == v then
                 --print(v)
-                coroutine.resume(k, p1, p2, p3, p4, p5)
+                local status, result = coroutine.resume(k, p1, p2, p3, p4, p5)
+                if result == "exit" then
+                    return
+                end
             end
         end
     end
@@ -146,7 +156,7 @@ function shell_routine(p1, p2, p3, p4, p5) -- char event
     term.setCursorBlink(true)
     io.write('$ ')
     while true do
-        --print(p1)
+        -- print(p1)
         io.write(p1)
         shell_input_buffer = shell_input_buffer..p1
         p1, p2, p3, p4, p5 = coroutine.yield()
@@ -167,7 +177,7 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
 
             table.remove(args, 1)
 
-            if command == "exit" then break end
+            if command == "exit" then coroutine.yield("exit") end
             local func, err = findfunction('commands.'..command)
 
             if err ~= nil then
@@ -191,5 +201,6 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
 end
 CoroutineManager.addListener(coroutine.create(shell_key_routine), "key")
 -- End Native Coroutines
-
-CoroutineManager.main()
+if args[1] == 'run' then
+    CoroutineManager.main()
+end

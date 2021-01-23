@@ -15,5 +15,6 @@ shell.close()
 
 local startup = fs.open("startup", 'w')
 startup.write([[
-shell.run("mtmscripts/mtmshell")
+os.loadAPI("mtmscripts/mtmshell")
+CoroutineManager.main()
 ]])
