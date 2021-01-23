@@ -50,7 +50,7 @@ function commands.installDependencies()
 end
 
 function commands.loadDependencies()
-    local missing = checkDependencies()
+    local missing = getMissingDependencies()
     for f, l in pairs(dependencies) do -- for each dependency
         if not utils.containsValue(missing, f) then -- if the dependency isn't missing
             os.loadAPI(f) -- load the dependency
