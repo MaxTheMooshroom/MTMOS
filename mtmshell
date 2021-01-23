@@ -1,9 +1,6 @@
 --require("utils")
 os.loadAPI("utils")
 
-shell.run("clear")
-utils.printWithFormat("&2MTMOS V0.0.1")
-
 local args = {...}
 
 dependencies = {}
@@ -164,7 +161,7 @@ function shell_routine(p1, p2, p3, p4, p5) -- char event
 end
 
 local shell_routine_coroutine = coroutine.create(shell_routine)
-coroutine.resume(shell_routine_coroutine, '')
+
 CoroutineManager.addListener(shell_routine_coroutine, "char")
 
 function shell_key_routine(p1, p2, p3, p4, p5) -- key event
@@ -202,5 +199,10 @@ end
 CoroutineManager.addListener(coroutine.create(shell_key_routine), "key")
 -- End Native Coroutines
 if args[1] == 'run' then
+    shell.run("clear")
+    utils.printWithFormat("&2MTMOS V0.0.1")
+
+    coroutine.resume(shell_routine_coroutine, '')
+
     CoroutineManager.main()
 end
