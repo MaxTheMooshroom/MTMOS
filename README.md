@@ -66,3 +66,12 @@ example:
 
 removes the file `junk_file`
 
+### Known Bugs/Issues:
+- [ ] Users cannot paste into the shell
+- [ ] as of [1c0db74](https://github.com/MaxTheMooshroom/MTMOS/commit/1c0db747773708b0b6712e39d61c02f955e6cf26)/[6c14756](https://github.com/MaxTheMooshroom/MTMOS/commit/6c147565c09b575f0e3f9dea9606026bdc384bf7), operations that trigger an event through `os.pullEvent()` fail. This is a result of the event listener/dispatcher core to MTMOS. This is being worked on.
+
+### Coming Updates
+- [ ] `net` package. Will include a wide range of networking capabilities for Computercraft devices, including ssh and ftp protocols being integrated with the shell.
+- [ ] `security` package. Will allow for more secure use of Computercraft devices. This includes hashed passwords, secure network protocols, etc.
+- [ ] `hive` package. Will include turtle swarm control capabilities
+- [ ] `external` package. Will include controlling a network of computers running `MTMOS` to be controlled from a website that I'm working on.  
