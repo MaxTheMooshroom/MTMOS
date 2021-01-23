@@ -1,5 +1,5 @@
-local utils_url = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/utils"
-local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/mtmshell"
+local utils_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/core/utils"
+local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/core/mtmshell"
 
 local utils_data = http.get(utils_url).readAll()
 local shell_data = http.get(shell_url).readAll()
