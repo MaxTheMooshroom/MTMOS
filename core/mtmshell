@@ -27,6 +27,9 @@ function commands.checkDependencies(...)
 end
 
 function commands.installDependency(dep)
+    if not fs.exists('mtmos/dependencies') then
+        shell.run('mkdir mtmos/dependencies')
+    end
     if fs.exists(dep) then
         print("\""..dep.."\" is already installed...")
         return
@@ -35,7 +38,7 @@ function commands.installDependency(dep)
         print("downloading \""..dep.."\"...")
         local data = coroutine.yield("http.get "..dependencies[dep])
         print("installing \""..dep.."\"...")
-        local file = fs.open(dep, 'w')
+        local file = fs.open('mtmos/dependencies/'..dep, 'w')
         file.write(data)
         file.close()
         print("Done!\n")
