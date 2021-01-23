@@ -77,11 +77,11 @@ end
 function commands.help()
     local count = 0
     for i in pairs(commands) do count = count + 1 end
-    print("Commands found: "..tostring(count))
-    --print(commands)
-    for i=1,count do
-        print(commands[i])
+    utils.printWithFormat("&1Commands found: "..tostring(count))
+    for k in utils.sortedKeys(commands) do
+        print(k)
     end
+    print()
 end
 
 -- End commands

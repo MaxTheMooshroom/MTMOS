@@ -76,9 +76,9 @@ function slice(array, start, _end)
 end
 
 -- credit: http://www.computercraft.info/forums2/index.php?/topic/11771-print-coloured-text-easily/
-function printWithFormat(...)
+function printWithFormat(data, _end)
     local s = "&0"
-    for k, v in ipairs(arg) do
+    for k, v in ipairs({data}) do
         s = s .. v
     end
     s = s .. "&0"
@@ -94,6 +94,25 @@ function printWithFormat(...)
         term.setTextColor(2 ^ (tonumber(fields[i][2], 16)))
         io.write(fields[i][1])
     end
-    io.write('\n')
+    if _end == nil then
+        _end = '\n'
+    end
+    io.write(_end)
     term.setTextColor(colors.white)
+end
+
+function sortedKeys(t, f)
+    local a = {}
+    for n in pairs(t) do table.insert(a, n) end
+    table.sort(a, f)
+
+    local i = 0      -- iterator variable
+
+    local iter = function ()   -- iterator function
+        i = i + 1
+        if a[i] == nil then return nil
+        else return a[i]
+        end
+    end
+    return iter
 end
