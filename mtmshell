@@ -131,7 +131,7 @@ CoroutineManager.main = function(...)
     while true do
         local event_type, p1, p2, p3, p4, p5 = os.pullEvent()
         if event_type ~= "key" and event_type ~= "char" and event_type ~= "key_up" then
-            print('Erroneous event triggered')
+            print('Erroneous event triggered: '..event_type)
         end
         --print("event: "..event_type)
         for k, v in pairs(CoroutineManager.listeners) do
