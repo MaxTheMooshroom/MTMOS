@@ -33,7 +33,7 @@ function commands.installDependency(dep)
     end
     if dependencies[dep] ~= nil then
         print("downloading \""..dep.."\"...")
-        local data = coroutine.yield("http.get "..dependencies[dep])--utils.wrapRequest(dependencies[dep])
+        local data = coroutine.yield("http.get "..dependencies[dep])
         print("installing \""..dep.."\"...")
         local file = fs.open(dep, 'w')
         file.write(data)
