@@ -130,10 +130,10 @@ local function wrapRequest( _url, _post )
   end
 end
 
-http.get = function( _url )
+_G.http.get = function( _url )
   return wrapRequest( _url, nil )
 end
 
-http.post = function( _url, _post )
+_G.http.post = function( _url, _post )
   return wrapRequest( _url, _post or "" )
 end
