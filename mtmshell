@@ -196,7 +196,13 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
             shell_input_buffer = ''
             io.write('$ ')
         elseif p1 == keys.backspace then
-            shell_input_buffer = shell_input_buffer:sub(1, -2)
+            local x, y = term.getCursorPos()
+            if x > 3 then
+                shell_input_buffer = shell_input_buffer:sub(1, -2)
+                term.setCursorPos(x-1, y)
+                io.write(' ')
+                term.setCursorPos(x-1, y)
+            end
         end
         p1, p2, p3, p4, p5 = coroutine.yield()
     end
