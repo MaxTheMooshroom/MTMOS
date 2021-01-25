@@ -1,4 +1,5 @@
-function split(input, sep)
+_G.stringutils = {}
+function stringutils.split(input, sep)
     if sep == nil then
         sep = "%s" --default sep to space
     end
@@ -12,7 +13,7 @@ function split(input, sep)
     return t
 end
 
-function join(data, sep)
+function stringutils.join(data, sep)
     if sep == nil then
         sep = ' '
     end
@@ -25,7 +26,8 @@ function join(data, sep)
     return t
 end
 
-function getKeys(t)
+_G.tableutils = {}
+function tableutils.getKeys(t)
     local t2 = {}
     local i = 0
     for k, v in pairs(t) do
@@ -35,7 +37,7 @@ function getKeys(t)
     return t2
 end
 
-function containsKey(t, key)
+function tableutils.containsKey(t, key)
     local val = false
     -- print("looking for "..key)
     for k, v in pairs(t) do
@@ -49,7 +51,7 @@ function containsKey(t, key)
     return val
 end
 
-function containsValue(t, key)
+function tableutils.containsValue(t, key)
     local val = false
     -- print("looking for "..key)
     for k, v in pairs(t) do
@@ -63,7 +65,7 @@ function containsValue(t, key)
     return val
 end
 
-function slice(array, start, _end)
+function tableutils.slice(array, start, _end)
     if _end == nil then
         _end = #array
     end
@@ -75,8 +77,40 @@ function slice(array, start, _end)
     return results
 end
 
+function tableutils.sortedKeys(t, f)
+    local a = {}
+    for n in pairs(t) do table.insert(a, n) end
+    table.sort(a, f)
+
+    local i = 0  -- iterator variable
+
+    local iter = function ()   -- iterator function
+        i = i + 1
+        if a[i] == nil then return nil
+        else return a[i]
+        end
+    end
+    return iter
+end
+
+function tableutils.deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
 -- credit: http://www.computercraft.info/forums2/index.php?/topic/11771-print-coloured-text-easily/
-function printWithFormat(data, _end)
+-- modified by MTM
+function _G.printf(data, _end)
     local s = "&0"
     for k, v in ipairs({data}) do
         s = s .. v
@@ -99,20 +133,4 @@ function printWithFormat(data, _end)
     end
     io.write(_end)
     term.setTextColor(colors.white)
-end
-
-function sortedKeys(t, f)
-    local a = {}
-    for n in pairs(t) do table.insert(a, n) end
-    table.sort(a, f)
-
-    local i = 0  -- iterator variable
-
-    local iter = function ()   -- iterator function
-        i = i + 1
-        if a[i] == nil then return nil
-        else return a[i]
-        end
-    end
-    return iter
 end

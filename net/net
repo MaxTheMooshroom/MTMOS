@@ -1,0 +1,64 @@
+local netcommands = {}
+local nethelper = {}
+local is_enabled = false
+
+function netReceiver(p1, p2, p3, p4, p5)
+    while true do
+        if p3 == 'ssh' then
+            local message = "ssh signal received from device \""..p1.."\": "
+            printf(message)
+            printf(p2)
+        else
+            print(type(p3))
+            print("protocol was "..p3)
+        end
+        p1, p2, p3, p4, p5 = coroutine.yield()
+    end
+end
+
+function netcommands.ssh(data)
+    local arguments = stringutils.split(data)
+    local command = arguments[1]
+    table.remove(arguments, 1)
+
+    if command == "enable" then
+        --print("ssh protocol not yet implemented!")
+        coroutine.yield("rnhost ssh sshserver")
+        CoroutineManager.addListener(coroutine.create(netReceiver), "rednet_message")
+        printf("&5SSH Enabled")
+    end
+end
+
+function netcommands.enable(data)
+    is_enabled = true
+    -- for k, v in pairs(data) do
+    --     print(textutils.serialize(k)..": "..textutils.serialize(v))
+    -- end
+    coroutine.yield("rnopen "..data)
+
+    printf("&5Networking Enabled")
+end
+
+function netcommands.disable(data)
+
+end
+
+commands.net = function(data)
+    local arguments = stringutils.split(data)
+    local command = arguments[1]
+    table.remove(arguments, 1)
+    findfunction(command, netcommands)(stringutils.join(arguments))
+end
+helper[commands.net] = [[
+The networking package. This package is used for easy communication with other devices running MTMOS.
+To enable networking capabilities via MTMOS, you must run
+&2$ net enable <top/bottom/left/right/front/back>&0
+
+Usage:
+&2$ net <subcommand> <parameters>&0
+
+To see a list of subcommands, enter
+&2$ net help&0
+or to get help with a specific subcommand, enter
+&2$ net help <subcommand>&0
+]]

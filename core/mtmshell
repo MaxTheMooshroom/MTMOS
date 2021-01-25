@@ -4,13 +4,16 @@ os.loadAPI("mtmos/core/utils")
 local args = {...}
 
 dependencies = {}
-dependencies['utils'] = "https://raw.githubusercontent.com/MaxTheMooshroom/computercraft-scripts/master/utils"
-dependencies['sha1'] = "http://regex.info/code/sha1.lua"
-dependencies['json'] = "https://pastebin.com/raw/4nRg9CHU"
+dependencies['mtmos/dependencies/sha1'] = "http://regex.info/code/sha1.lua"
+dependencies['mtmos/dependencies/json'] = "https://pastebin.com/raw/4nRg9CHU"
 
 -- Begin Commands:
 commands = {}
+helper = {}
 _G.commands = commands
+_G.helper = helper
+
+os.loadAPI("mtmos/net/net")
 
 function getMissingDependencies()
     local missing = {}
@@ -25,6 +28,11 @@ end
 function commands.checkDependencies(...)
     print(textutils.serialize(getMissingDependencies()))
 end
+helper[commands.checkDependencies] = [[&0Prints a list of missing dependencies.
+
+Usage:
+&2$ checkDependencies
+]]
 
 function commands.installDependency(dep)
     if not fs.exists('mtmos/dependencies') then
@@ -38,12 +46,20 @@ function commands.installDependency(dep)
         print("downloading \""..dep.."\"...")
         local data = coroutine.yield("http.get "..dependencies[dep])
         print("installing \""..dep.."\"...")
-        local file = fs.open('mtmos/dependencies/'..dep, 'w')
+        local file = fs.open(dep, 'w')
         file.write(data)
         file.close()
         print("Done!\n")
     end
 end
+helper[commands.installDependency] = [[&0Installs all missing dependencies. Must be in the dependencies table.
+
+Usage:
+installDependency <dependency>
+
+Example:
+&2$ installDependency mtmos/dependencies/sha1
+]]
 
 function commands.installDependencies()
     local missing = getMissingDependencies()
@@ -51,15 +67,26 @@ function commands.installDependencies()
         commands.installDependency(missing[i])
     end
 end
+helper[commands.installDependencies] = [[
+&0Installs all missing dependencies.
+
+Usage:
+&2$ installDependencies
+]]
 
 function commands.loadDependencies()
     local missing = getMissingDependencies()
     for f, l in pairs(dependencies) do -- for each dependency
-        if not utils.containsValue(missing, f) then -- if the dependency isn't missing
+        if not tableutils.containsValue(missing, f) then -- if the dependency isn't missing
             os.loadAPI(f) -- load the dependency
         end
     end
 end
+helper[commands.loadDependencies] = [[&0Loads the installed dependencies in case they aren't loaded or haven't been reloaded since a local edit was made.
+
+Usage:
+&2$ loadDependencies
+]]
 
 function commands.shell(str)
     shell.run(str)
@@ -72,28 +99,42 @@ function commands.lua(str)
         loadstring(str)()
     end
 end
+helper[commands.lua] = [[&0runs lua (&1WIP&0)]]
 
 function commands.clear()
     shell.run("clear")
-    utils.printWithFormat("&2MTMOS V0.0.1")
+    printf("&2MTMOS V0.0.1")
 end
 
-function commands.help()
-    local count = 0
-    for i in pairs(commands) do count = count + 1 end
-    utils.printWithFormat("&1Commands found: "..tostring(count))
-    for k in utils.sortedKeys(commands) do
-        print(k)
+function commands.help(command)
+    if command == nil then
+        local count = 0
+        for i in pairs(commands) do count = count + 1 end
+        printf("&1Commands found: "..tostring(count))
+        for k in tableutils.sortedKeys(commands) do
+            print(k)
+        end
+        print()
+    else
+        command = "commands."..command
+        local func, err = findfunction(command)
+        if err == nil then
+            printf(helper[func])
+        else
+            print("command \"".."\" not found")
+        end
     end
-    print()
 end
 
 -- End commands
 
 -- function for finding a function given its name as a string
-function findfunction(x)
+function _G.findfunction(x, table)
   assert(type(x) == "string")
-  local f=_G
+  local f = _G
+  if table ~= nil then
+      f = table
+  end
   for v in x:gmatch("[^%.]+") do
     if type(f) ~= "table" then
        return nil, "looking for '"..v.."' expected table, not "..type(f)
@@ -109,6 +150,23 @@ end
 
 commands.loadDependencies()
 
+
+interupts = {} -- interupt vector
+_G.interupts = interupts
+
+interupts["http.get"] = function(data)
+    return http.get(data[1]).readAll()
+end
+
+interupts["rnhost"] = function(data)
+    data = stringutils.split(data)
+    rednet.host(data[1], data[2])
+end
+
+interupts["rnopen"] = function(data)
+    rednet.open(data)
+end
+
 -- Coroutine Manager
 CoroutineManager = {}
 _G.CoroutineManager = CoroutineManager
@@ -120,22 +178,19 @@ CoroutineManager.addListener = function(func, event)
     CoroutineManager.listeners[func] = event
 end
 CoroutineManager.main = function(...)
-    while true do
-        local event_type, p1, p2, p3, p4, p5 = os.pullEvent()
-        -- if event_type ~= "key" and event_type ~= "char" and event_type ~= "key_up" then
-        --     print('Erroneous event triggered: '..event_type)
-        -- end
-        --print("event: "..event_type)
-        for k, v in pairs(CoroutineManager.listeners) do
-            if event_type == v then
-                --print(v)
-                local status, results = coroutine.resume(k, p1, p2, p3, p4, p5)
-                if results ~= nil then
-                    results = utils.split(results)
-                    if results[1] == "exit" then
+    while true do -- event dispatcher main loop
+        local event_type, p1, p2, p3, p4, p5 = os.pullEvent() -- get event
+        for k, v in pairs(CoroutineManager.listeners) do -- go through each listener
+            if v == event_type then -- if the listener's desired type is that of the current event
+                local status, results = coroutine.resume(k, p1, p2, p3, p4, p5) -- call the listener with the event arguments
+                while results ~= nil do -- loop until the listener has yielded a result of nil
+                    results = stringutils.split(results) -- split the result into separate words
+                    local interupt = results[1] -- get the first word from results
+                    table.remove(results, 1) -- remove the first word from results
+                    if k == shell_key_coroutine and interupt == "exit" then -- exit condition
                         return
-                    elseif results[1] == "http.get" then
-                        coroutine.resume(k, http.get(results[2]).readAll())
+                    else
+                        status, results = coroutine.resume(k, interupts[interupt](stringutils.join(results))) --
                     end
                 end
             end
@@ -148,25 +203,26 @@ end
 local shell_input_buffer = ""
 function shell_char_routine(p1, p2, p3, p4, p5) -- char event
     term.setCursorBlink(true)
+    term.setCursorPos(1, 19)
     io.write('$ ')
     while true do
-        -- print(p1)
+        term.setCursorPos(3 + #shell_input_buffer, 19)
         io.write(p1)
         shell_input_buffer = shell_input_buffer..p1
         p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
 
-local shell_routine_coroutine = coroutine.create(shell_char_routine)
+local shell_char_coroutine = coroutine.create(shell_char_routine)
 
-CoroutineManager.addListener(shell_routine_coroutine, "char")
+CoroutineManager.addListener(shell_char_coroutine, "char")
 
-function shell_key_routine(p1, p2, p3, p4, p5) -- key event
+function _G.shell_key_routine(p1, p2, p3, p4, p5) -- key event
     while true do
         --print('test')
         if p1 == keys.enter then
             print()
-            local args = utils.split(shell_input_buffer)
+            local args = stringutils.split(shell_input_buffer)
             local command = args[1]
 
             table.remove(args, 1)
@@ -181,11 +237,12 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
                 if #args == 0 then
                     func()
                 else
-                    func(utils.join(args))
+                    func(stringutils.join(args))
                 end
                 --print("hit2")
             end
             shell_input_buffer = ''
+            term.setCursorPos(1, 19)
             io.write('$ ')
         elseif p1 == keys.backspace then
             local x, y = term.getCursorPos()
@@ -199,24 +256,25 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
         p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
-CoroutineManager.addListener(coroutine.create(shell_key_routine), "key")
+shell_key_coroutine = coroutine.create(shell_key_routine)
+CoroutineManager.addListener(shell_key_coroutine, "key")
 -- End Native Coroutines
 if args[1] == 'run' then
     shell.run("clear")
-    utils.printWithFormat("&2MTMOS V0.0.1")
+    printf("&2MTMOS V0.0.1")
 
     -- find missing dependencies
     local miss = getMissingDependencies()
     if #miss > 0 then
         for name = 1, #miss do
-            utils.printWithFormat("&0[&1WARNING&0]: Missing dependency: "..miss[name])
+            printf("&0[&1WARNING&0]: Missing dependency: "..miss[name])
         end
-        utils.printWithFormat("&0Please run the dependency installer with \n'&2installDependencies&0'")
+        printf("&0Please run the dependency installer with \n'&2installDependencies&0'")
         print()
     end
     -- end search
 
-    coroutine.resume(shell_routine_coroutine, '')
+    coroutine.resume(shell_char_coroutine, '')
 
     CoroutineManager.main()
 end
