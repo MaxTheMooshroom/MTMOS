@@ -8,6 +8,7 @@ The intended use case is to allow for easy multi-processing. I want to be able t
 
 ### Installation
 To install MTMOS, open a computercraft computer and type (or paste line by line) the following:
+
 `lua`
 
 `installer_data = http.get("https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/installer").readAll()`
