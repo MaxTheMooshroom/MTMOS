@@ -1,8 +1,10 @@
 local utils_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/core/utils"
 local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/core/mtmshell"
+local net_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/net/net"
 
 local utils_data = http.get(utils_url).readAll()
 local shell_data = http.get(shell_url).readAll()
+local net_data = http.get(net_url).readAll()
 
 shell.run('mkdir mtmos')
 shell.run('mkdir mtmos/core')
@@ -11,6 +13,9 @@ local utils = fs.open("mtmos/core/utils", 'w')
 utils.write(utils_data)
 utils.close()
 
+local net = fs.open("mtmos/net/net", 'w')
+net.write(net_data)
+net.close()
 
 local shell = fs.open("mtmos/core/mtmshell", 'w')
 shell.write(shell_data)
@@ -20,3 +25,4 @@ local startup = fs.open("startup", 'w')
 startup.write([[
 shell.run("mtmos/core/mtmshell run")
 ]])
+startup.close()
