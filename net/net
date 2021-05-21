@@ -40,6 +40,26 @@ function netcommands.disable(data)
     printf("&1Not Yet Implemented")
 end
 
+function netcommands.help(netcommand)
+    if netcommand == nil then
+        local count = 0
+        for i in pairs(netcommands) do count = count + 1 end
+        printf("&1Commands found: "..tostring(count))
+        for k in tableutils.sortedKeys(netcommands) do
+            print(k)
+        end
+        print()
+    else
+        netcommand = "netcommands."..netcommand
+        local func, err = findfunction(netcommand)
+        if err == nil then
+            printf(helper[func])
+        else
+            print("command \""..netcommand.."\" not found")
+        end
+    end
+end
+
 commands.net = function(data)
     local arguments = stringutils.split(data)
     local command = arguments[1]

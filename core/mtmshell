@@ -133,7 +133,7 @@ function commands.help(command)
         if err == nil then
             printf(helper[func])
         else
-            print("command \"".."\" not found")
+            print("command \""..command.."\" not found")
         end
     end
 end
