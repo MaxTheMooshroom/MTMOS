@@ -37,7 +37,7 @@ function netcommands.enable(data)
 end
 
 function netcommands.disable(data)
-    printdf("%1Not Yet Implemented")
+    printf("%1Not Yet Implemented")
 end
 
 commands.net = function(data)
