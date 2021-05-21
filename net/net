@@ -31,16 +31,13 @@ end
 
 function netcommands.enable(data)
     is_enabled = true
-    -- for k, v in pairs(data) do
-    --     print(textutils.serialize(k)..": "..textutils.serialize(v))
-    -- end
     coroutine.yield("rnopen "..data)
 
     printf("&5Networking Enabled")
 end
 
 function netcommands.disable(data)
-
+    printdf("%1Not Yet Implemented")
 end
 
 commands.net = function(data)
