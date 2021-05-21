@@ -155,6 +155,7 @@ interupts = {} -- interupt vector
 _G.interupts = interupts
 
 interupts["http.get"] = function(data)
+    printf(data)
     return http.get(data[1]).readAll()
 end
 
