@@ -115,7 +115,7 @@ helper[commands.lua] = [[&0runs lua (&1WIP&0)]]
 
 function commands.clear()
     shell.run("clear")
-    printf("&2MTMOS V0.0.1")
+    printf("&2MTMOS V0.1.0")
 end
 
 function commands.help(command)
@@ -273,7 +273,7 @@ CoroutineManager.addListener(shell_key_coroutine, "key")
 -- End Native Coroutines
 if args[1] == 'run' then
     shell.run("clear")
-    printf("&2MTMOS V0.0.1")
+    printf("&2MTMOS V0.1.0")
 
     -- find missing dependencies
     local miss = getMissingDependencies()
