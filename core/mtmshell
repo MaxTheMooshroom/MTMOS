@@ -18,22 +18,7 @@ os.loadAPI("mtmos/net/net")
 -- help with printf colours
 function commands.colors()
     printf("Here are the colors:\n")
-    printf("&00")
-    printf("&11")
-    printf("&22")
-    printf("&33")
-    printf("&44")
-    printf("&55")
-    printf("&66")
-    printf("&77")
-    printf("&88")
-    printf("&99")
-    printf("&aa")
-    printf("&bb")
-    printf("&cc")
-    printf("&dd")
-    printf("&ee")
-    printf("&ff")
+    printf("&00&11&22&33&44&55&66&77&88&99&aa&bb&cc&dd&ee&ff")
 end
 
 helper[commands.colors] = [[Prints a list of colour codes in their corresponding colour
