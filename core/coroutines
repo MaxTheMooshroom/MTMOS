@@ -1,3 +1,6 @@
+local coroutines = {}
+_G.coroutines = coroutines
+
 local shell_input_buffer = ""
 function shell_char_routine(p1, p2, p3, p4, p5) -- char event
     term.setCursorBlink(true)
@@ -10,12 +13,9 @@ function shell_char_routine(p1, p2, p3, p4, p5) -- char event
         p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
+CoroutineManager.addListener(coroutine.create(shell_char_routine), "char")
 
-local shell_char_coroutine = coroutine.create(shell_char_routine)
-
-CoroutineManager.addListener(shell_char_coroutine, "char")
-
-function _G.shell_key_routine(p1, p2, p3, p4, p5) -- key event
+function shell_key_routine(p1, p2, p3, p4, p5) -- key event
     while true do
         --print('test')
         if p1 == keys.enter then
@@ -54,5 +54,4 @@ function _G.shell_key_routine(p1, p2, p3, p4, p5) -- key event
         p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
-shell_key_coroutine = coroutine.create(shell_key_routine)
-CoroutineManager.addListener(shell_key_coroutine, "key")
+CoroutineManager.addListener(coroutine.create(shell_key_routine), "key")
