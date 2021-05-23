@@ -1,5 +1,5 @@
 # MaxTheMooshroom's OS (MTMOS)
-Current version: 0.0.1
+Current version: 0.1.0
  
 This is an OS I'm creating for computercraft. Currently a WIP, I would not recommend installing yet, but feel free to peruse the code.
 
