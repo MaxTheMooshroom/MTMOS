@@ -134,3 +134,25 @@ function _G.printf(data, _end)
     io.write(_end)
     term.setTextColor(colors.white)
 end
+
+
+-- function for finding a function given its name as a string
+-- credit: https://stackoverflow.com/questions/1791234/lua-call-function-from-a-string-with-function-name
+function _G.findfunction(x, table)
+  assert(type(x) == "string")
+  local f = _G
+  if table ~= nil then
+      f = table
+  end
+  for v in x:gmatch("[^%.]+") do
+    if type(f) ~= "table" then
+       return nil, "looking for '"..v.."' expected table, not "..type(f)
+    end
+    f=f[v]
+  end
+  if type(f) == "function" then
+    return f, nil
+  else
+    return nil, "expected function, not "..type(f)
+  end
+end
