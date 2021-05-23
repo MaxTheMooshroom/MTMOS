@@ -4,14 +4,14 @@ _G.commands = commands
 _G.helper = helper
 
 
-
+-- Found below are shell commands that users may use in MTMOS by default.
+-- Additional packages may add more commands, see their documentation for details.
 
 -- help with printf colours
 function commands.colors()
     printf("Here are the colors:\n")
     printf("&00&11&22&33&44&55&66&77&88&99&aa&bb&cc&dd&ee&ff")
 end
-
 helper[commands.colors] = [[Prints a list of colour codes in their corresponding colour
 
 Usage:
@@ -24,7 +24,6 @@ Usage:
 function commands.shell(str)
     shell.run(str)
 end
-
 helper[commands.shell] = [[Runs a command using CraftOS.
 
 Usage:
@@ -42,7 +41,11 @@ function commands.lua(str)
         loadstring(str)()
     end
 end
-helper[commands.lua] = [[runs lua (&fWIP&0)]]
+helper[commands.lua] = [[runs lua (&fWIP&0)
+
+Usage:
+&2$ lua
+]]
 
 
 
@@ -51,7 +54,11 @@ function commands.clear()
     shell.run("clear")
     printf("&2MTMOS V0.1.0")
 end
-helper[commands.clear] = [[Clears the screen]]
+helper[commands.clear] = [[Clears the screen
+
+Usage:
+&2$ clear
+]]
 
 
 
@@ -75,3 +82,12 @@ function commands.help(command)
         end
     end
 end
+helper[commands.help] = [[Provides help with registered commands
+
+Usage:
+&2$ help
+Lists available commands
+
+&2$ help <command>
+Provides help with a specific command
+]]

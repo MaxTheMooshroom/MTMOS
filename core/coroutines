@@ -1,0 +1,58 @@
+local shell_input_buffer = ""
+function shell_char_routine(p1, p2, p3, p4, p5) -- char event
+    term.setCursorBlink(true)
+    term.setCursorPos(1, 19)
+    io.write('$ ')
+    while true do
+        term.setCursorPos(3 + #shell_input_buffer, 19)
+        io.write(p1)
+        shell_input_buffer = shell_input_buffer..p1
+        p1, p2, p3, p4, p5 = coroutine.yield()
+    end
+end
+
+local shell_char_coroutine = coroutine.create(shell_char_routine)
+
+CoroutineManager.addListener(shell_char_coroutine, "char")
+
+function _G.shell_key_routine(p1, p2, p3, p4, p5) -- key event
+    while true do
+        --print('test')
+        if p1 == keys.enter then
+            print()
+            local args = stringutils.split(shell_input_buffer)
+            local command = args[1]
+
+            table.remove(args, 1)
+
+            if command == "exit" then coroutine.yield("exit") end
+            local func, err = findfunction('commands.'..command)
+
+            if err ~= nil then
+                print("Could not find command \""..command.."\"")
+                print(err)
+            else
+                if #args == 0 then
+                    func()
+                else
+                    func(stringutils.join(args))
+                end
+                --print("hit2")
+            end
+            shell_input_buffer = ''
+            term.setCursorPos(1, 19)
+            io.write('$ ')
+        elseif p1 == keys.backspace then
+            local x, y = term.getCursorPos()
+            if x > 3 then
+                shell_input_buffer = shell_input_buffer:sub(1, -2)
+                term.setCursorPos(x-1, y)
+                io.write(' ')
+                term.setCursorPos(x-1, y)
+            end
+        end
+        p1, p2, p3, p4, p5 = coroutine.yield()
+    end
+end
+shell_key_coroutine = coroutine.create(shell_key_routine)
+CoroutineManager.addListener(shell_key_coroutine, "key")
