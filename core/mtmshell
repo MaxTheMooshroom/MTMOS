@@ -104,17 +104,6 @@ if args[1] == 'run' then
     shell.run("clear")
     printf("&2MTMOS V0.1.0")
 
-    -- find missing dependencies
-    local miss = getMissingDependencies()
-    if #miss > 0 then
-        for name = 1, #miss do
-            printf("&0[&1WARNING&0]: Missing dependency: "..miss[name])
-        end
-        printf("&0Please run the dependency installer with \n'&2installDependencies&0'")
-        print()
-    end
-    -- end search
-
     coroutine.resume(shell_char_coroutine, '')
 
     CoroutineManager.main()
