@@ -36,12 +36,13 @@ Usage:
 function commands.lua(str)
     printf("&eWARNING! VERY WIP! CURRENTLY BROKEN")
     if str == nil then
+        global_states["function_count"] = global_states["function_count"] + 1
         shell.run('lua')
     else
         loadstring(str)()
     end
 end
-helper[commands.lua] = [[runs lua (&fWIP&0)
+helper[commands.lua] = [[opens the lua interpreter (&eWIP&0)
 
 Usage:
 &2$ lua

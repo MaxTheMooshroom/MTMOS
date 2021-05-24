@@ -11,7 +11,7 @@ local args = {...} -- cli arguments, if any
 -- program will likely respond to the events differently.
 
 _G.global_states = {}
-global_states["function_running"] = false
+global_states["function_count"] = 0
 
 -- END STATES
 
