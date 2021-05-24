@@ -27,7 +27,7 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
             table.remove(args, 1)
 
             if command == "exit" then coroutine.yield("exit") end
-            local func, err = findfunction('commands.'..command)
+            local func, err = findfunction('command_list.'..command)
 
             if err ~= nil then
                 print("Could not find command \""..command.."\"")

@@ -1,6 +1,6 @@
-commands = {}
-helper = {}
-_G.commands = commands
+local command_list = {}
+local helper = {}
+_G.command_list = command_list
 _G.helper = helper
 
 
@@ -8,7 +8,7 @@ _G.helper = helper
 -- Additional packages may add more commands, see their documentation for details.
 
 -- help with printf colours
-function commands.colors()
+function command_list.colors()
     printf("Here are the colors:\n")
     printf("&00&11&22&33&44&55&66&77&88&99&aa&bb&cc&dd&ee&ff")
 end
@@ -21,7 +21,7 @@ Usage:
 
 
 
-function commands.shell(str)
+function command_list.shell(str)
     shell.run(str)
 end
 helper[commands.shell] = [[Runs a command using CraftOS.
@@ -33,7 +33,7 @@ Usage:
 
 
 
-function commands.lua(str)
+function command_list.lua(str)
     printf("&eWARNING! VERY WIP! CURRENTLY BROKEN")
     if str == nil then
         global_states["function_count"] = global_states["function_count"] + 1
@@ -51,7 +51,7 @@ Usage:
 
 
 
-function commands.clear()
+function command_list.clear()
     shell.run("clear")
     printf("&2MTMOS V0.1.0")
 end
@@ -64,7 +64,7 @@ Usage:
 
 
 
-function commands.help(command)
+function command_list.help(command)
     if command == nil then
         local count = 0
         for i in pairs(commands) do count = count + 1 end
