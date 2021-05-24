@@ -1,9 +1,9 @@
 
 
-local utils_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/utils"
-local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/mtmshell"
-local commands_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/commands"
-local coroutines_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/coroutines"
+local utils_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/utils.lua"
+local shell_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/mtmshell.lua"
+local commands_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/commands.lua"
+local coroutines_url = "https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/core/coroutines.lua"
 
 
 
