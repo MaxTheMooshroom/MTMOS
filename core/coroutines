@@ -1,8 +1,8 @@
-local coroutines = {}
-_G.coroutines = coroutines
+local native_coroutines = {}
+_G.native_coroutines = native_coroutines
 
 local shell_input_buffer = ""
-function shell_char_routine(p1, p2, p3, p4, p5) -- char event
+function _shell_char_routine(p1, p2, p3, p4, p5) -- char event
     term.setCursorBlink(true)
     term.setCursorPos(1, 19)
     io.write('$ ')
@@ -13,11 +13,11 @@ function shell_char_routine(p1, p2, p3, p4, p5) -- char event
         p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
-CoroutineManager.addListener(coroutine.create(shell_char_routine), "char")
+shell_char_routine = coroutine.create(_shell_char_routine)
+CoroutineManager.addListener(shell_char_routine, "char")
 
 function shell_key_routine(p1, p2, p3, p4, p5) -- key event
     while true do
-        --print('test')
         if p1 == keys.enter then
             print()
             local args = stringutils.split(shell_input_buffer)
@@ -37,7 +37,6 @@ function shell_key_routine(p1, p2, p3, p4, p5) -- key event
                 else
                     func(stringutils.join(args))
                 end
-                --print("hit2")
             end
             shell_input_buffer = ''
             term.setCursorPos(1, 19)
