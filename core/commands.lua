@@ -67,15 +67,14 @@ Usage:
 function command_list.help(command)
     if command == nil then
         local count = 0
-        for i in pairs(commands) do count = count + 1 end
+        for i in pairs(command_list) do count = count + 1 end
         printf("&1Commands found: "..tostring(count))
-        for k in tableutils.sortedKeys(commands) do
+        for k in tableutils.sortedKeys(command_list) do
             print(k)
         end
         print()
     else
-        command = "commands."..command
-        local func, err = findfunction(command)
+        local func, err = findfunction(command, command_list)
         if err == nil then
             printf(helper[func])
         else
@@ -86,9 +85,9 @@ end
 helper[command_list.help] = [[Provides help with registered commands
 
 Usage:
-&2$ help
+&2$ help&0
 Lists available commands
 
-&2$ help <command>
+&2$ help <command>&0
 Provides help with a specific command
 ]]
