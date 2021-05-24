@@ -12,7 +12,7 @@ function command_list.colors()
     printf("Here are the colors:\n")
     printf("&00&11&22&33&44&55&66&77&88&99&aa&bb&cc&dd&ee&ff")
 end
-helper[commands.colors] = [[Prints a list of colour codes in their corresponding colour
+helper[command_list.colors] = [[Prints a list of colour codes in their corresponding colour
 
 Usage:
 &2$ colors
@@ -24,7 +24,7 @@ Usage:
 function command_list.shell(str)
     shell.run(str)
 end
-helper[commands.shell] = [[Runs a command using CraftOS.
+helper[command_list.shell] = [[Runs a command using CraftOS.
 
 Usage:
 &2$ shell <command>
@@ -42,7 +42,7 @@ function command_list.lua(str)
         loadstring(str)()
     end
 end
-helper[commands.lua] = [[opens the lua interpreter (&eWIP&0)
+helper[command_list.lua] = [[opens the lua interpreter (&eWIP&0)
 
 Usage:
 &2$ lua
@@ -55,7 +55,7 @@ function command_list.clear()
     shell.run("clear")
     printf("&2MTMOS V0.1.0")
 end
-helper[commands.clear] = [[Clears the screen
+helper[command_list.clear] = [[Clears the screen
 
 Usage:
 &2$ clear
@@ -83,7 +83,7 @@ function command_list.help(command)
         end
     end
 end
-helper[commands.help] = [[Provides help with registered commands
+helper[command_list.help] = [[Provides help with registered commands
 
 Usage:
 &2$ help
