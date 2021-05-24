@@ -11,7 +11,7 @@ To install MTMOS, open a computercraft computer and type (or paste line by line)
 
 `lua`
 
-`installer_data = http.get("https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/master/installer").readAll()`
+`installer_data = http.get("https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS/redo/installer").readAll()`
 
 `installer = fs.open("installer", 'w')`
 
