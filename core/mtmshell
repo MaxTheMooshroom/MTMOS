@@ -3,7 +3,17 @@ os.loadAPI("mtmos/core/commands")
 
 local args = {...} -- cli arguments, if any
 
+-- BEGIN STATES: DECLARATION AND INITIALIZATION
 
+-- these states are used by MTMOS to determine how an event should be responded
+-- to, if at all. For example, if the "function_running" state is "true", then
+-- only the currently running program should respond to new events, since that
+-- program will likely respond to the events differently.
+
+_G.global_states = {}
+global_states["function_running"] = false
+
+-- END STATES
 
 -- The interrupts here are (obviously) not actual processor interrupts. However,
 -- they interrupt the currently running process(es) to fetch data for the current

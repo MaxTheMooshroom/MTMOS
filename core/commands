@@ -73,7 +73,7 @@ function commands.help(command)
         end
         print()
     else
-        command = "commands.commands."..command
+        command = "commands."..command
         local func, err = findfunction(command)
         if err == nil then
             printf(helper[func])

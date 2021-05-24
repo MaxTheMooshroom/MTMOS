@@ -2,6 +2,7 @@ local native_coroutines = {}
 _G.native_coroutines = native_coroutines
 
 local shell_input_buffer = ""
+local shell_cursor_position = 3 -- unused; will be used with left/right arrow keys
 function _shell_char_routine(p1, p2, p3, p4, p5) -- char event
     term.setCursorBlink(true)
     term.setCursorPos(1, 19)
