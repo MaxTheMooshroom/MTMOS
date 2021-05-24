@@ -74,7 +74,7 @@ function command_list.help(command)
         end
         print()
     else
-        local func, err = findfunction(command, command_list)
+        local func, err = findfunction("command_list."..command, command_list)
         if err == nil then
             printf(helper[func])
         else
