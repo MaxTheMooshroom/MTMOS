@@ -104,7 +104,7 @@ if args[1] == 'run' then
     shell.run("clear")
     printf("&2MTMOS V0.1.0")
 
-    coroutine.resume(coroutines.shell_char_routine, '')
+    coroutine.resume(shell_char_routine, '')
 
     CoroutineManager.main()
 end

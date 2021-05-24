@@ -13,7 +13,7 @@ function _shell_char_routine(p1, p2, p3, p4, p5) -- char event
         p1, p2, p3, p4, p5 = coroutine.yield()
     end
 end
-shell_char_routine = coroutine.create(_shell_char_routine)
+_G.shell_char_routine = coroutine.create(_shell_char_routine)
 CoroutineManager.addListener(shell_char_routine, "char")
 
 function shell_key_routine(p1, p2, p3, p4, p5) -- key event
