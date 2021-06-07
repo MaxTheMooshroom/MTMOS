@@ -1,7 +1,8 @@
 _G.stringutils = {}
+
 function stringutils.split(input, sep)
     if sep == nil then
-        sep = "%s" --default sep to space
+        sep = "%s"                                                              --default sep to space
     end
 
     local t = {}
@@ -26,7 +27,18 @@ function stringutils.join(data, sep)
     return t
 end
 
+function stringutils.insert(str1, str2, pos)
+    return str1:sub(1,pos)..str2..str1:sub(pos+1)
+end
+
+function stringutils.popLeft(str, i)
+    if i == nil then i = 1 end
+    return string.sub(str, 1, i), string.sub(str, i + 1, -1)
+end
+
+
 _G.tableutils = {}
+
 function tableutils.getKeys(t)
     local t2 = {}
     local i = 0
@@ -39,13 +51,9 @@ end
 
 function tableutils.containsKey(t, key)
     local val = false
-    -- print("looking for "..key)
     for k, v in pairs(t) do
         if k == key then
-        --    print(v.."=="..key)
             val = true
-        --else
-        --    print(v.."!="..key)
         end
     end
     return val
@@ -53,13 +61,9 @@ end
 
 function tableutils.containsValue(t, key)
     local val = false
-    -- print("looking for "..key)
     for k, v in pairs(t) do
         if v == key then
-        --    print(v.."=="..key)
             val = true
-        --else
-        --    print(v.."!="..key)
         end
     end
     return val
@@ -82,9 +86,9 @@ function tableutils.sortedKeys(t, f)
     for n in pairs(t) do table.insert(a, n) end
     table.sort(a, f)
 
-    local i = 0  -- iterator variable
+    local i = 0                                                                 -- iterator variable
 
-    local iter = function ()   -- iterator function
+    local iter = function ()                                                    -- iterator function
         i = i + 1
         if a[i] == nil then return nil
         else return a[i]
@@ -99,13 +103,48 @@ function tableutils.deepcopy(orig)
     if orig_type == 'table' then
         copy = {}
         for orig_key, orig_value in next, orig, nil do
-            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+            copy[tableutils.deepcopy(orig_key)] = tableutils.deepcopy(orig_value)
         end
-        setmetatable(copy, deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
+        setmetatable(copy, tableutils.deepcopy(getmetatable(orig)))
+    else                                                                        -- number, string, boolean, etc
         copy = orig
     end
     return copy
+end
+
+function tableutils.to_string(t, depth)
+    if depth == nil then depth = 1 end
+    local buffer = ''
+
+    buffer = buffer..string.rep('  ', depth-1)..'{\n'
+    for k,v in pairs(t) do
+        local _type = type(v)
+        if _type == 'table' then
+            buffer = buffer..string.rep('  ', depth)..'['..k..'] =\n'
+            buffer = buffer..tableutils.to_string(v, depth+1)..',\n'
+        elseif _type == 'function' then
+            buffer = buffer..string.rep('  ', depth)..'['..k..'] = function,\n'
+        elseif _type == 'thread' then
+            buffer = buffer..string.rep('  ', depth)..'['..k..'] = thread,\n'
+        elseif _type == 'boolean' then
+            local string_rep
+            if v == true then string_rep = 'true,\n' else string_rep = 'false,\n' end
+            buffer = buffer..string.rep('  ', depth)..'['..k..'] = '..string_rep
+        elseif _type == 'string' then
+            buffer = buffer..string.rep('  ', depth)..'['..k..'] = "'..v..'",\n'
+        else
+            buffer = buffer..string.rep('  ', depth)..'['..k..'] = '..v..',\n'
+        end
+    end
+    buffer = buffer..string.rep('  ', depth-1)..'}'
+
+    return buffer
+end
+
+function tableutils.dump(t, where)
+    local file = fs.open(where, 'w')
+    file.write(tableutils.to_string(t))
+    file.close()
 end
 
 -- credit: http://www.computercraft.info/forums2/index.php?/topic/11771-print-coloured-text-easily/
@@ -130,8 +169,10 @@ function _G.printf(data, _end)
     end
     if _end == nil then
         _end = '\n'
+    elseif _end == '\0' then
+        _end = nil
     end
-    io.write(_end)
+    if _end ~= nil then io.write(_end) end
     term.setTextColor(colors.white)
 end
 
