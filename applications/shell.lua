@@ -1,17 +1,47 @@
+--require("MTMOS/core/screen")
+
 local Program = {}
 
-local screen_buffer = {}
-local scroll_offset = 0
+local screen
+screen_buffer.scroll_offset = 0
+screen_buffer.has_changed = false
+
+
+local previous_input_buffer = 0
 local input_buffer = ''
 local input_offset = 0
 
 local should_draw = true
 
+local commands = {}
+local command_alises = {}
+
+function commands.echo(arguments)
+    term.setCursorPos(1,1)
+    local width = term.getSize()
+    io.write(string.rep(' ', width))
+    term.setCursorPos(1,1)
+    io.write(arguments)
+end
+
+function commands.run(arguments)
+    local program_location = table.remove(arguments, 1)
+    Programs.open(program_location, arguments)
+end
+
 local function parse()
-    -- do something with input_buffer and screen_buffer
+    table.insert(screen_buffer, input_buffer)
+    local args = stringutils.split(input_buffer)
+    local command = table.remove(args, 1)
+    local command_args = stringutils.join(args)
+    local func = commands[command] or commands[command_alises[command]]
+    if func ~= nil then
+        func(command_args)
+    else
+        printf('&eCommand "'..command..'" not found', '\0')
+    end
     input_buffer = ''
     input_offset = 0
-    should_draw = true
 end
 
 function Program.Info()
@@ -20,6 +50,9 @@ function Program.Info()
 end
 
 function Program.Main()
+    -- INIT
+    screen = Screen.new()
+    -- END INIT
     coroutine.yield()
     while true do
         local _event = Program.container.eq:pop()
@@ -33,31 +66,41 @@ function Program.Main()
 
             elseif _event.type == 'key' then
                 -- left arrow key; don't go too far left
-                if _event.p1 == 203 and input_offset ~= string:len(input_buffer) then
+                if _event.p1 == keys.left and input_offset ~= string.len(input_buffer) then
                     input_offset = input_offset + 1
                     local _, height = term.getSize()
                     term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
                     term.setCursorBlink(true)
 
                 -- right arrow key; don't go too far right
-                elseif _event.p1 == 205 and input_offset ~= 0 then
+                elseif _event.p1 == keys.right and input_offset ~= 0 then
                     input_offset = input_offset - 1
                     local _, height = term.getSize()
                     term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
                     term.setCursorBlink(true)
 
                 -- backspace key; don't go too far to the left
-                elseif _event.p1 == 14 then
-                    input_offset = input_offset - 1
+                elseif _event.p1 == keys.backspace and string.len(input_buffer) > 0 and input_offset ~= string.len(input_buffer) then
+                    local width, height = term.getSize()
+                    if input_offset > string.len(input_buffer) then input_offset = string.len(input_buffer) end
                     local diff = string.len(input_buffer) - input_offset
-                    input_buffer = string.sub(input_buffer, 1, diff) .. _event.p1 .. string.sub(input_buffer, diff+2)
-                    local _, height = term.getSize()
+                    input_buffer = string.sub(input_buffer, 1, diff-1) .. string.sub(input_buffer, diff+1)
                     term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
                     term.setCursorBlink(true)
 
                 -- enter key
-                elseif _event.p1 == 28 then
+                elseif _event.p1 == keys.enter then
+                    local x, y = term.getCursorPos()
+                    local width, height = term.getSize()
                     parse()
+                    term.setCursorPos(1, height)
+                    printf('&6$ '..string.rep(' ', width-2), '\0')
+                    term.setCursorPos(x, y)
+                -- else
+                    -- local x, y = term.getCursorPos()
+                    -- term.setCursorPos(1, 1)
+                    -- io.write(_event.p1)
+                    -- term.setCursorPos(x, y)
                 end
             end
         end
@@ -65,26 +108,29 @@ function Program.Main()
     end
 end
 
-function Program.Draw(_P)
+function Program.Draw()
+    term.setCursorPos(1, 1)
+    printf('&6MTMOS V0.2.0A')
+    local screen = Program.container.screen
     while true do
         --io.write('.')
         -- if should_draw == true then
         -- TODO print screen buffer
         -- term.clear()
-        term.setCursorBlink(false)
-        local x, y = term.getCursorPos()
-        local _, height = term.getSize()
-        term.setCursorPos(1, height)
-        printf('&6$ ', '\0')
-        io.write(input_buffer)
-        term.setCursorBlink(true)
-        term.setCursorPos(x, y)
-        -- tableutils.dump({
-        --         input_buffer = input_buffer
-        --     },
-        --     "draw.data"
-        -- )
-        -- end
+        if input_buffer ~= previous_input_buffer then
+            term.setCursorBlink(false)
+            local width, height = term.getSize()
+            term.setCursorPos(1, height)
+            io.write(string.rep(' ', width))
+            term.setCursorPos(1, height)
+            printf('&6$ &0'..input_buffer, '\0')
+            term.setCursorBlink(true)
+            term.setCursorPos(3 + string.len(input_buffer) - input_offset, height)
+
+            previous_input_buffer = input_buffer
+        end
+
+        --if
         coroutine.yield()
     end
 end

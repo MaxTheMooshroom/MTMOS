@@ -36,6 +36,35 @@ function stringutils.popLeft(str, i)
     return string.sub(str, 1, i), string.sub(str, i + 1, -1)
 end
 
+-- breaks a string up by spaces or quotes.
+-- credit: https://stackoverflow.com/questions/28664139/lua-split-string-into-words-unless-quoted
+-- modified by MtM
+function stringutils.parameterize(arguments)
+    local result = {}
+    local spat, epat, buf, quoted = [=[^(['"])]=], [=[(['"])$]=]
+    for str in string.gmatch(arguments, "%S+") do
+      local squoted = string.match(str, spat)
+      local equoted = string.match(str, epat)
+      local escaped = string.match(str, [=[(\*)['"]$]=])
+      if squoted and not quoted and not equoted then
+        buf, quoted = str, squoted
+      elseif buf and equoted == quoted and #escaped % 2 == 0 then
+        str, buf, quoted = buf .. ' ' .. str, nil, nil
+      elseif buf then
+        buf = buf .. ' ' .. str
+      end
+      if not buf then
+          local temp = string.gsub(str, spat, "")
+          result[#result + 1] = string.gsub(temp, epat, "")
+      end
+    end
+    if buf then
+        return -1
+    else
+        return result
+    end
+end
+
 
 _G.tableutils = {}
 
@@ -158,7 +187,7 @@ function _G.printf(data, _end)
 
     local fields = {}
     local lastcolor, lastpos = "0", 0
-    for pos, clr in s:gmatch"()&(%x)" do
+    for pos, clr in string.gmatch(s, "()&(%x)") do
         table.insert(fields, {s:sub(lastpos + 2, pos - 1), lastcolor})
         lastcolor, lastpos = clr , pos
     end

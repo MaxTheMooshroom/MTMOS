@@ -13,8 +13,9 @@ do
 end
 
 function main()
-    Programs.open('MTMOS/applications/shell.lua')
-    Programs.setFocusedProgram(Programs.findByName("mtmos-shell"))
+    local _p = Programs.open('MTMOS/applications/shell.lua')
+    --print(tableutils.to_string(PROGRAM_LIST))
+    Programs.setFocusedProgram(_p)
     parallel.waitForAny(Programs.renderFocused, Programs.tick, Events.poll)
 end
 
