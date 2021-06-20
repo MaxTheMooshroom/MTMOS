@@ -1,4 +1,4 @@
-require("MTMOS/core/modules/utils")
+require("modules/utils")
 
 _G.Screen = {}
 

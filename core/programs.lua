@@ -69,7 +69,10 @@ function Programs.make(module, arguments)
     end
 
     function new_program.tickFunc()
-        coroutine.resume(new_program.main_thread)
+        local success, msg = coroutine.resume(new_program.main_thread)
+        if success == false then
+            error(msg)
+        end
     end
 
     new_program.tickFunc()                                                      -- call tick once for program initialization

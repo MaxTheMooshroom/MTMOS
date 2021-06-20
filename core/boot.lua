@@ -1,5 +1,6 @@
 require("modules/utils")
 require("events")
+require("screen")
 
 local args = {...} -- cli arguments, if any
 
