@@ -3,6 +3,7 @@
 local Program = {}
 
 local screen_buffer = {}
+Program.screen_buffer = screen_buffer
 screen_buffer.content = {}
 screen_buffer.scroll_offset = 0
 screen_buffer.has_changed = false
@@ -15,6 +16,7 @@ local input_offset = 0
 local should_draw = true
 
 local commands = {}
+Program.commands = commands
 local command_alises = {}
 
 function commands.echo(arguments)
@@ -28,6 +30,10 @@ end
 
 local function parse()
     table.insert(screen_buffer.content, "&6$ &0"..input_buffer)
+    if input_buffer == '' then
+        screen_buffer.has_changed = true
+        return
+    end
     local args = stringutils.split(input_buffer)
     local command = table.remove(args, 1)
     local command_args = stringutils.join(args)
@@ -111,12 +117,11 @@ function Program.Draw()
     printf('&6MTMOS V0.2.0A')
     --local screen = Program.container.screen
     while true do
-        --io.write('.')
-        -- if should_draw == true then
-        -- TODO print screen buffer
-        --term.clear()
+        local width, height = term.getSize()
         if screen_buffer.has_changed then
-            for i=1,#screen_buffer.content do
+
+            local linecount_min = math.min(#screen_buffer.content, height)
+            for i=1,linecount_min do
                 term.setCursorPos(1, i)
                 printf(screen_buffer.content[i], '\0')
             end
@@ -125,7 +130,6 @@ function Program.Draw()
 
         if input_buffer ~= previous_input_buffer then
             term.setCursorBlink(false)
-            local width, height = term.getSize()
             term.setCursorPos(1, height)
             io.write(string.rep(' ', width))
             term.setCursorPos(1, height)

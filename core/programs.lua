@@ -103,7 +103,6 @@ end
 
 function Programs.suspend(nTime) -- TODO
     Programs.findByThread(coroutine.running()).suspended = true
-
 end
 
 function Programs.tick()
