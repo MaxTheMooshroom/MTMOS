@@ -51,6 +51,7 @@ function Screen.new(parent, nX, nY, nWidth, nHeight)
             term.setCursorPos(1, i)
             printf(new_screen.contents[i + display_offset])
         end
+        term.redirect(_to_restore)
     end
 
     return new_screen

@@ -4,7 +4,7 @@ local Program = {}
 
 local screen_buffer = {}
 Program.screen_buffer = screen_buffer
-screen_buffer.content = {}
+screen_buffer.content = {'&6MTMOS V0.2.0A',}
 screen_buffer.scroll_offset = 0
 screen_buffer.has_changed = false
 
@@ -26,6 +26,12 @@ end
 function commands.run(arguments)
     local program_location = table.remove(arguments, 1)
     Programs.open(program_location, arguments)
+end
+
+function commands.clear(arguments)
+    screen_buffer.content = {}
+    screen_buffer.scroll_offset = 0
+    term.clear()
 end
 
 local function parse()
@@ -106,6 +112,19 @@ function Program.Main()
                     -- io.write(_event.p1)
                     -- term.setCursorPos(x, y)
                 end
+            elseif _event.type == 'mouse_scroll' then
+                local prev_scroll = screen_buffer.scroll_offset
+                local width, height = term.getSize()
+                local max_scroll = math.max(0, #screen_buffer.content - (height - 1))
+                screen_buffer.scroll_offset = screen_buffer.scroll_offset - _event.p1
+
+                if screen_buffer.scroll_offset < 0 then
+                    screen_buffer.scroll_offset = 0
+                elseif screen_buffer.scroll_offset > max_scroll then
+                    screen_buffer.scroll_offset = max_scroll
+                end
+
+                screen_buffer.has_changed = screen_buffer.scroll_offset ~= prev_scroll
             end
         end
         coroutine.yield()
@@ -119,13 +138,23 @@ function Program.Draw()
     while true do
         local width, height = term.getSize()
         if screen_buffer.has_changed then
+            local cx, cy = term.getCursorPos()
+            local display_offset = 0
 
-            local linecount_min = math.min(#screen_buffer.content, height)
-            for i=1,linecount_min do
+            if #screen_buffer.content + screen_buffer.scroll_offset > height - 1 then
+                display_offset = (#screen_buffer.content - (height - 1)) - screen_buffer.scroll_offset
+            elseif #screen_buffer.content > height - 1 then
+                display_offset = #screen_buffer.content - (height - 1)
+            end
+
+            for i=1,height-1 do
                 term.setCursorPos(1, i)
-                printf(screen_buffer.content[i], '\0')
+                io.write(string.rep(' ', width))
+                term.setCursorPos(1, i)
+                printf(screen_buffer.content[i + display_offset], '\0')
             end
             screen_buffer.has_changed = false
+            term.setCursorPos(cx, cy)
         end
 
         if input_buffer ~= previous_input_buffer then
@@ -133,7 +162,8 @@ function Program.Draw()
             term.setCursorPos(1, height)
             io.write(string.rep(' ', width))
             term.setCursorPos(1, height)
-            printf('&6$ &0'..input_buffer, '\0')
+            printf('&6$ &0', '\0')
+            io.write(input_buffer)
             term.setCursorBlink(true)
             term.setCursorPos(3 + string.len(input_buffer) - input_offset, height)
 
