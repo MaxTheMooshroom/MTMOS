@@ -226,3 +226,30 @@ function _G.findfunction(x, table)
     return nil, "expected function, not "..type(f)
   end
 end
+
+function _G.http_get(url)
+    local current_prog = Programs.findByThread(coroutine.running())
+    local headers = {
+        url = url,
+        uuid = current_prog.uuid.to_string(current_prog.uuid)
+    }
+    http.request("https://fe6db7c415c2.ngrok.io/get", nil, headers)
+
+    Programs.suspend(current_prog)
+    coroutine.yield()
+    local found = false
+    local response
+    for i=1, current_prog.eq:size() do
+        local __event = current_prog.eq:pop()
+        if __event.type ~= "http_success" and __event.type ~= "http_failure" then
+            current_prog.eq:push(__event)
+        elseif found == false then
+            local req_tab = __event.p2
+            local req_uuid = UUID(req_tab['Uuid'])
+            if req_uuid.match(current_prog.uuid) then
+                response = __event
+            end
+        end
+    end
+    return response
+end

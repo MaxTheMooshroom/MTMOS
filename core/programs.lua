@@ -101,8 +101,8 @@ function Programs.open(path, arguments)
     return Programs.make(result, arguments)
 end
 
-function Programs.suspend(nTime) -- TODO
-    Programs.findByThread(coroutine.running()).suspended = true
+function Programs.suspend(prog) -- TODO
+    prog.suspended = true
 end
 
 function Programs.tick()
@@ -131,6 +131,14 @@ end
 function Programs.findByThread(_thread)
     for _, v in pairs(PROGRAM_LIST) do
         if v.main_thread == _thread then
+            return v
+        end
+    end
+end
+
+function Programs.findByUuid(other_uuid)
+    for _, v in pairs(PROGRAM_LIST) do
+        if v.uuid.match(other_uuid) then
             return v
         end
     end

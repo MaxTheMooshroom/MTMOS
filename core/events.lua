@@ -18,12 +18,12 @@ end
 
 local hiatus_timer_id
 
-function Events.new(type, p1, p2, p3, p4, p5)
+function Events.new(_type, p1, p2, p3, p4, p5)
     local new_event = {}
 
     new_event.thread = coroutine.running()
     new_event.uuid = UUID()
-    new_event.type = type
+    new_event.type = _type
     new_event.p1 = p1
     new_event.p2 = p2
     new_event.p3 = p3
@@ -52,9 +52,6 @@ function Events.new(type, p1, p2, p3, p4, p5)
                 prog = Programs.findByThread(self.thread)
             elseif type(self.target) == 'string' then
                 prog = Programs.findByName(self.target)
-            else
-                printf('&einvalid program target for event')
-                return
             end
             if prog ~= nil then
                 prog.eq:push(self)
@@ -90,6 +87,23 @@ function Events.poll()
         if args[1] == "timer" and args[2] == hiatus_timer_id then
             hiatus_timer_id = os.startTimer(0.05)
             should_push = false
+        elseif args[1] == "http_success" then
+            io.write('.')
+            if args[3] ~= nil then
+                io.write(',')
+                local response = args[3]
+                local headers = response.getResponseHeaders()
+                if headers['Uuid'] ~= nil then
+                    io.write(';')
+                    local prog_uuid = UUID(headers['Uuid'])
+                    local prog_to_resume = Programs.findByUuid(prog_uuid)
+                    prog_to_resume.suspended = false
+                    print('========='..prog_to_resume.name)
+                    local http_event = Events.new(args[1], args[2], args[3])
+                    http_event.target = prog_to_resume
+                    http_event:dispatch()
+                end
+            end
         else
             os.cancelTimer(hiatus_timer_id)
             hiatus_timer_id = os.startTimer(0.05)

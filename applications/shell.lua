@@ -24,8 +24,9 @@ function commands.echo(arguments)
 end
 
 function commands.run(arguments)
-    local program_location = table.remove(arguments, 1)
-    Programs.open(program_location, arguments)
+    local args = stringutils.parameterize(arguments)
+    local program_location = table.remove(args, 1)
+    Programs.open(program_location, args)
 end
 
 function commands.clear(arguments)
@@ -34,23 +35,51 @@ function commands.clear(arguments)
     term.clear()
 end
 
+function commands.wget(arguments)
+    local args = stringutils.parameterize(arguments)
+    if #args ~= 2 then
+        table.insert(screen_buffer.content, "Usage: &6wget <url> <filename>")
+        return
+    end
+
+    local request = http_get(args[1])
+    local code, msg = request.getResponseCode()
+    if msg ~= "OK" then
+        table.insert(screen_buffer.content, '&6'..msg)
+        return
+    end
+    local file_contents = request.readAll()
+    if fs.exists(args[2]) then
+        table.insert(screen_buffer.content, '&6File "'..args[2]..'" already exists')
+        return
+    end
+    local f = fs.open(args[2], 'w')
+    f.write(file_contents)
+    f.close()
+end
+
+function commands.getminer(arguments)
+    commands.wget('"https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS-Programs/master/miner/main.lua" "miner.lua"')
+end
+
 local function parse()
     table.insert(screen_buffer.content, "&6$ &0"..input_buffer)
     if input_buffer == '' then
         screen_buffer.has_changed = true
         return
     end
-    local args = stringutils.split(input_buffer)
+    local args = stringutils.parameterize(input_buffer)
     local command = table.remove(args, 1)
     local command_args = stringutils.join(args)
     local func = commands[command] or commands[command_alises[command]]
     if func ~= nil then
         func(command_args)
     else
-        printf('&eCommand "'..command..'" not found', '\0')
+        table.insert(screen_buffer.content, '&eCommand "'..command..'" not found')
     end
     input_buffer = ''
     input_offset = 0
+    screen_buffer.scroll_offset = 0
     screen_buffer.has_changed = true
 end
 
@@ -125,6 +154,13 @@ function Program.Main()
                 end
 
                 screen_buffer.has_changed = screen_buffer.scroll_offset ~= prev_scroll
+
+            elseif _event.type == 'paste' then
+                local diff = string.len(input_buffer) - input_offset
+                input_buffer = string.sub(input_buffer, 1, diff) .. _event.p1 .. string.sub(input_buffer, diff+1)
+                local _, height = term.getSize()
+                term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
+                term.setCursorBlink(true)
             end
         end
         coroutine.yield()

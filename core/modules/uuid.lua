@@ -23,6 +23,10 @@ function _G.UUID(value)
         new_uuid.values[4] = tonumber(string.sub(value, 25, 32), 16)
     end
 
+    function new_uuid.match(other_uuid)
+        return (new_uuid.values[1] == other_uuid.values[1]) and (new_uuid.values[2] == other_uuid.values[2]) and (new_uuid.values[3] == other_uuid.values[3]) and (new_uuid.values[4] == other_uuid.values[4])
+    end
+
     function new_uuid.to_string(self)
         local uuid_str = to_hex(self.values[1], 8)..to_hex(self.values[2], 8)..to_hex(self.values[3], 8)..to_hex(self.values[4], 8)
         uuid_str = stringutils.insert(uuid_str, '-', 20)
