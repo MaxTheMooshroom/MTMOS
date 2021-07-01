@@ -21,7 +21,7 @@ Events.addListener('terminate', terminator)
 
 function main()
     local shell_program = Programs.open('MTMOS/applications/shell.lua')
-    --Programs.setFocusedProgram(shell_program)
+    Programs.setFocusedProgram(shell_program)
     _G._shell = shell
     _G.shell = shell_program
 
