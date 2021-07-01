@@ -1,212 +1,173 @@
---require("MTMOS/core/screen")
+require("MTMOS/core/screen")
 
 local Program = {}
 
-local screen_buffer = {}
-Program.screen_buffer = screen_buffer
-screen_buffer.content = {'&6MTMOS V0.2.0A',}
-screen_buffer.scroll_offset = 0
-screen_buffer.has_changed = false
+Program.prefix = '&6$ '
+Program.insert_prefix = '> '
 
+Program.shell_objects = { {output=OSNAME..' V'..OSVERSION}, }
+local shell_v_offset = 0
+local shell_should_draw_objects = true
 
-local previous_input_buffer = 0
 local input_buffer = ''
-local input_offset = 0
+local shell_h_input_offset = 0
+local shell_h_input_display_offset = 0
+local shell_should_draw_input_buffer = true
 
-local should_draw = true
-
-local commands = {}
-Program.commands = commands
-local command_alises = {}
-
-function commands.echo(arguments)
-    table.insert(screen_buffer.content, arguments)
+--[[
+    input: Array[string], output: Array[string]
+    input is for use of this program only, used by run()
+]]
+local function shellObject(output, input)
+    table.insert(Program.shell_objects, {input=input, output=output, from=Programs.findByThread(coroutine.running()).name})
 end
 
-function commands.run(arguments)
-    local args = stringutils.parameterize(arguments)
-    local program_location = table.remove(args, 1)
-    Programs.open(program_location, args)
+--[[
+    text: string
+]]
+local function shellWrite(text)
+    local words = stringutils.split(text)
+    local lines = {''}
+
+    local width, height = term.getSize()
+    for i=1,#words do
+        local word = words[i]
+        if stringutils.formattedLength(lines[#lines]) + stringutils.formattedLength(word) + 1 <= width then
+            lines[#lines] = lines[#lines]..' '..word
+        else
+            table.insert(lines, word)
+        end
+    end
+    shellObject(lines)
 end
 
-function commands.clear(arguments)
-    screen_buffer.content = {}
-    screen_buffer.scroll_offset = 0
-    term.clear()
+local function formatShellObjects()
+
 end
 
-function commands.wget(arguments)
-    local args = stringutils.parameterize(arguments)
-    if #args ~= 2 then
-        table.insert(screen_buffer.content, "Usage: &6wget <url> <filename>")
-        return
-    end
-
-    local request = http_get(args[1])
-    local code, msg = request.getResponseCode()
-    if msg ~= "OK" then
-        table.insert(screen_buffer.content, '&6'..msg)
-        return
-    end
-    local file_contents = request.readAll()
-    if fs.exists(args[2]) then
-        table.insert(screen_buffer.content, '&6File "'..args[2]..'" already exists')
-        return
-    end
-    local f = fs.open(args[2], 'w')
-    f.write(file_contents)
-    f.close()
+local function run(input)
+    
 end
 
-function commands.getminer(arguments)
-    commands.wget('"https://raw.githubusercontent.com/MaxTheMooshroom/MTMOS-Programs/master/miner/main.lua" "miner.lua"')
-end
-
-local function parse()
-    table.insert(screen_buffer.content, "&6$ &0"..input_buffer)
-    if input_buffer == '' then
-        screen_buffer.has_changed = true
-        return
-    end
-    local args = stringutils.parameterize(input_buffer)
-    local command = table.remove(args, 1)
-    local command_args = stringutils.join(args)
-    local func = commands[command] or commands[command_alises[command]]
-    if func ~= nil then
-        func(command_args)
-    else
-        table.insert(screen_buffer.content, '&eCommand "'..command..'" not found')
-    end
-    input_buffer = ''
-    input_offset = 0
-    screen_buffer.scroll_offset = 0
-    screen_buffer.has_changed = true
+local function cprint(text, val, cy)
+    local width = term.getCursorPos()
+    text = text..": "..tostring(val)
+    term.setCursorPos(1, cy)
+    printf('&f'..string.rep(' ', width))
+    term.setCursorPos(1, cy)
+    printf(text, '\0')
 end
 
 function Program.Info()
     Program.container.name = 'mtmos-shell'
-    Program.container.name_pretty = 'Shell'
 end
 
 function Program.Main()
-    -- INIT
-    --screen = Screen.new()
-    -- END INIT
+    Program.container.write = shellWrite
+    Program.container.run = run
     coroutine.yield()
+    term.setCursorBlink(true)
     while true do
         local _event = Program.container.eq:pop()
         if _event ~= nil then
+            local width, height = term.getSize()
+            -- Event Types
             if _event.type == 'char' then
-                local diff = string.len(input_buffer) - input_offset
-                input_buffer = string.sub(input_buffer, 1, diff) .. _event.p1 .. string.sub(input_buffer, diff+1)
-                local _, height = term.getSize()
-                term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
-                term.setCursorBlink(true)
-
+                input_buffer = string.sub(input_buffer, 1, shell_h_input_offset) .. _event.p1 .. string.sub(input_buffer, shell_h_input_offset+1)
+                shell_h_input_offset = shell_h_input_offset + 1
+                if stringutils.formattedLength(input_buffer) + stringutils.formattedLength(Program.prefix) > width - 1 then
+                    shell_h_input_display_offset = shell_h_input_display_offset + 1
+                end
+                shell_should_draw_input_buffer = true
             elseif _event.type == 'key' then
-                -- left arrow key; don't go too far left
-                if _event.p1 == keys.left and input_offset ~= string.len(input_buffer) then
-                    input_offset = input_offset + 1
-                    local _, height = term.getSize()
-                    term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
-                    term.setCursorBlink(true)
+                if _event.p1 == keys.backspace then
+                    if shell_h_input_offset ~= 0 then
+                        input_buffer = string.sub(input_buffer, 1, shell_h_input_offset-1) .. string.sub(input_buffer, shell_h_input_offset+1)
+                        shell_h_input_offset = shell_h_input_offset - 1
 
-                -- right arrow key; don't go too far right
-                elseif _event.p1 == keys.right and input_offset ~= 0 then
-                    input_offset = input_offset - 1
-                    local _, height = term.getSize()
-                    term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
-                    term.setCursorBlink(true)
+                        if stringutils.formattedLength(input_buffer) + stringutils.formattedLength(Program.prefix) >= width - 1 then
+                            shell_h_input_display_offset = shell_h_input_display_offset - 1
+                        end
 
-                -- backspace key; don't go too far to the left
-                elseif _event.p1 == keys.backspace and string.len(input_buffer) > 0 and input_offset ~= string.len(input_buffer) then
-                    local width, height = term.getSize()
-                    if input_offset > string.len(input_buffer) then input_offset = string.len(input_buffer) end
-                    local diff = string.len(input_buffer) - input_offset
-                    input_buffer = string.sub(input_buffer, 1, diff-1) .. string.sub(input_buffer, diff+1)
-                    term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
-                    term.setCursorBlink(true)
+                        if shell_h_input_offset < shell_h_input_display_offset then
+                            shell_h_input_display_offset = shell_h_input_offset
+                        end
 
-                -- enter key
-                elseif _event.p1 == keys.enter then
-                    local x, y = term.getCursorPos()
-                    local width, height = term.getSize()
+                        if shell_h_input_offset > stringutils.formattedLength(input_buffer) then
+                            shell_h_input_offset = shell_h_input_offset - 1
+                        end
+                    end
+                    shell_should_draw_input_buffer = true
+                elseif _event.p1 == keys.delete then
+                    if shell_h_input_offset ~= 0 then
+                        input_buffer = string.sub(input_buffer, 1, shell_h_input_offset) .. string.sub(input_buffer, shell_h_input_offset+2)
+                        shell_should_draw_input_buffer = true
+                    end
+                elseif _event.p1 == keys.left then
+                    if shell_h_input_offset ~= 0 then
+                        shell_h_input_offset = shell_h_input_offset - 1
+                        if shell_h_input_offset < shell_h_input_display_offset then
+                            shell_h_input_display_offset = shell_h_input_offset
+                        elseif shell_h_input_offset > stringutils.formattedLength(input_buffer) then
+                            shell_h_input_offset = shell_h_input_offset - 1
+                        end
+                        shell_should_draw_input_buffer = true
+                    end
+                elseif _event.p1 == keys.right then
+                    if shell_h_input_offset ~= stringutils.formattedLength(input_buffer) then
+                        if stringutils.formattedLength(Program.prefix) - shell_h_input_display_offset + shell_h_input_offset + 1 == width then
+                            shell_h_input_display_offset = shell_h_input_display_offset + 1
+                        end
+                        shell_h_input_offset = shell_h_input_offset + 1
+                        shell_should_draw_input_buffer = true
+                    end
+                elseif _event.p1 == keys.up then
+                elseif _event.p2 == keys.down then
+                elseif _event.p1 == keys.enter or _event.p1 == keys.numPadEnter then
                     parse()
-                    term.setCursorPos(1, height)
-                    printf('&6$ '..string.rep(' ', width-2), '\0')
-                    term.setCursorPos(x, y)
-                -- else
-                    -- local x, y = term.getCursorPos()
-                    -- term.setCursorPos(1, 1)
-                    -- io.write(_event.p1)
-                    -- term.setCursorPos(x, y)
                 end
-            elseif _event.type == 'mouse_scroll' then
-                local prev_scroll = screen_buffer.scroll_offset
-                local width, height = term.getSize()
-                local max_scroll = math.max(0, #screen_buffer.content - (height - 1))
-                screen_buffer.scroll_offset = screen_buffer.scroll_offset - _event.p1
-
-                if screen_buffer.scroll_offset < 0 then
-                    screen_buffer.scroll_offset = 0
-                elseif screen_buffer.scroll_offset > max_scroll then
-                    screen_buffer.scroll_offset = max_scroll
-                end
-
-                screen_buffer.has_changed = screen_buffer.scroll_offset ~= prev_scroll
-
-            elseif _event.type == 'paste' then
-                local diff = string.len(input_buffer) - input_offset
-                input_buffer = string.sub(input_buffer, 1, diff) .. _event.p1 .. string.sub(input_buffer, diff+1)
-                local _, height = term.getSize()
-                term.setCursorPos(2 + string.len(input_buffer) - input_offset + 1, height)
-                term.setCursorBlink(true)
             end
         end
+
         coroutine.yield()
     end
 end
 
 function Program.Draw()
-    term.setCursorPos(1, 1)
-    printf('&6MTMOS V0.2.0A')
-    --local screen = Program.container.screen
     while true do
         local width, height = term.getSize()
-        if screen_buffer.has_changed then
-            local cx, cy = term.getCursorPos()
-            local display_offset = 0
+        local cx_new = stringutils.formattedLength(Program.prefix) - shell_h_input_display_offset + shell_h_input_offset + 1
+        -- cprint("&1cx_new", cx_new, 2)
+        -- cprint("&2shell_h_input_offset", shell_h_input_offset, 3)
+        -- cprint("&3shell_h_input_display_offset", shell_h_input_display_offset, 4)
+        -- cprint("&4width", width, 6)
+        -- cprint("&5#input_buffer + #prefix", stringutils.formattedLength(input_buffer) + stringutils.formattedLength(Program.prefix), 7)
+        -- cprint("&6input cursor x position", stringutils.formattedLength(Program.prefix) - shell_h_input_display_offset + shell_h_input_offset + 1, 8)
+        term.setCursorPos(cx_new, height)
 
-            if #screen_buffer.content + screen_buffer.scroll_offset > height - 1 then
-                display_offset = (#screen_buffer.content - (height - 1)) - screen_buffer.scroll_offset
-            elseif #screen_buffer.content > height - 1 then
-                display_offset = #screen_buffer.content - (height - 1)
-            end
+        if shell_should_draw_objects then
 
-            for i=1,height-1 do
-                term.setCursorPos(1, i)
-                io.write(string.rep(' ', width))
-                term.setCursorPos(1, i)
-                printf(screen_buffer.content[i + display_offset], '\0')
-            end
-            screen_buffer.has_changed = false
-            term.setCursorPos(cx, cy)
         end
 
-        if input_buffer ~= previous_input_buffer then
-            term.setCursorBlink(false)
+        if shell_should_draw_input_buffer then
+            local input_display_string
+            if stringutils.formattedLength(Program.prefix) + stringutils.formattedLength(input_buffer) < width then
+                input_display_string = input_buffer
+            else
+                input_display_string = string.sub(input_buffer, shell_h_input_display_offset + 1, shell_h_input_display_offset + width - stringutils.formattedLength(Program.prefix))
+            end
+            term.setCursorPos(1, 1)
+            io.write(string.rep(' ', width))
+            term.setCursorPos(1, 1)
+            printf(input_display_string)
             term.setCursorPos(1, height)
             io.write(string.rep(' ', width))
             term.setCursorPos(1, height)
-            printf('&6$ &0', '\0')
-            io.write(input_buffer)
-            term.setCursorBlink(true)
-            term.setCursorPos(3 + string.len(input_buffer) - input_offset, height)
-
-            previous_input_buffer = input_buffer
+            printf(Program.prefix, '\0')
+            io.write(input_display_string)
+            shell_should_draw_input_buffer = false
         end
 
-        --if
         coroutine.yield()
     end
 end

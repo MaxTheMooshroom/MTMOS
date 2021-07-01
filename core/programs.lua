@@ -62,7 +62,8 @@ function Programs.make(module, arguments)
             -- new_program.window.setVisible(false)
             -- frame_buffer.setVisible(true)
 
-            coroutine.resume(new_program.draw_thread)
+            local success, msg = coroutine.resume(new_program.draw_thread)
+            if success == false then error(msg) end
 
             -- new_program.window.setVisible(true)
         end

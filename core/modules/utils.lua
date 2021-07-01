@@ -178,22 +178,24 @@ end
 
 -- credit: http://www.computercraft.info/forums2/index.php?/topic/11771-print-coloured-text-easily/
 -- modified by MTM
-function _G.printf(data, _end)
-    local s = "&0"
-    for k, v in ipairs({data}) do
-        s = s .. v
-    end
-    s = s .. "&0"
+function _G.printf(text, _end)
+    if text == '' or text == nil then return end
+    local s = "%f&0"..text.."%f&0"
 
     local fields = {}
-    local lastcolor, lastpos = "0", 0
-    for pos, clr in string.gmatch(s, "()&(%x)") do
-        table.insert(fields, {s:sub(lastpos + 2, pos - 1), lastcolor})
-        lastcolor, lastpos = clr , pos
+    local lastcolor, lastpos = "0", 1
+    for pos, clr in string.gmatch(s, "()[&%%](%x)") do
+        table.insert(fields, {s:sub(lastpos + 2, pos - 1), lastcolor, s:sub(lastpos, lastpos)=='&'})
+        lastcolor, lastpos = clr, pos
     end
 
-    for i = 2, #fields do
-        term.setTextColor(2 ^ (tonumber(fields[i][2], 16)))
+    for i=1, #fields do
+        local _color = 2 ^ (tonumber(fields[i][2], 16))
+        if fields[i][3] == true then
+            term.setTextColour(_color)
+        else
+            term.setBackgroundColor(_color)
+        end
         io.write(fields[i][1])
     end
     if _end == nil then
@@ -202,7 +204,26 @@ function _G.printf(data, _end)
         _end = nil
     end
     if _end ~= nil then io.write(_end) end
-    term.setTextColor(colors.white)
+    term.setTextColour(colors.white)
+    term.setBackgroundColor(colors.black)
+end
+
+function stringutils.formattedLength(text)
+    if text == '' or text == nil then return 0 end
+    local s = text..'&0'
+    local fields = {}
+    local lastcolor, lastpos = "0", -1
+    for pos, clr in string.gmatch(s, "()[&%%](%x)") do
+        table.insert(fields, s:sub(lastpos + 2, pos - 1))
+        lastcolor, lastpos = clr, pos
+    end
+
+    local formatted_string = ''
+    for i=1, #fields do
+        formatted_string = formatted_string..fields[i]
+    end
+
+    return string.len(formatted_string)
 end
 
 
